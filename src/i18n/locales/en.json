@@ -1,0 +1,90 @@
+{
+  "app": {
+    "title": "Awesome Shop"
+  },
+  "nav": {
+    "home": "Home",
+    "notFound": "Page Not Found"
+  },
+  "home": {
+    "welcome": "Welcome to Awesome Shop",
+    "description": "Project skeleton is ready. Start building your e-commerce app."
+  },
+  "login": {
+    "brand": "AWSome Shop",
+    "brandSubtitle": "Employee Points Redemption Platform",
+    "brandDesc": "Redeem your points for favorite items\nSimple, convenient, at your fingertips",
+    "title": "Welcome Back",
+    "subtitle": "Sign in to your account to continue",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "loginBtn": "Sign In",
+    "loginFailed": "Invalid username or password",
+    "noAccount": "Don't have an account?",
+    "register": "Register Now",
+    "hint": "Test accounts: employee / emp123 (Employee) or admin / admin123 (Admin)"
+  },
+  "employee": {
+    "nav": {
+      "home": "Home",
+      "orders": "Orders",
+      "points": "Points"
+    },
+    "searchPlaceholder": "Search products...",
+    "search": "Search",
+    "points": "Points",
+    "heroTitle": "Monthly Featured",
+    "heroSubtitle": "Redeem your favorite items with points, updated monthly",
+    "heroBrowse": "Browse Now",
+    "sold": "Redeemed",
+    "soldUnit": "",
+    "redeem": "Redeem"
+  },
+  "admin": {
+    "title": "Admin",
+    "welcome": "Welcome",
+    "userLabel": "Admin",
+    "dashboard": "Dashboard",
+    "nav": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "categories": "Categories",
+      "points": "Points",
+      "orders": "Orders",
+      "users": "Users"
+    },
+    "metrics": {
+      "totalProducts": "Total Products",
+      "totalUsers": "Total Users",
+      "monthlyRedemptions": "Monthly Redemptions",
+      "pointsCirculation": "Points Circulation"
+    },
+    "recentOrders": "Recent Orders",
+    "viewAll": "View All",
+    "table": {
+      "user": "User",
+      "product": "Product",
+      "points": "Points",
+      "status": "Status",
+      "time": "Time"
+    }
+  },
+  "menu": {
+    "switchLang": "Language",
+    "switchTheme": "Theme",
+    "logout": "Sign Out",
+    "langZh": "中文",
+    "langEn": "English",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "roleEmployee": "Employee",
+    "roleAdmin": "Admin"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Sorry, the page you visited does not exist.",
+    "backHome": "Back to Home"
+  }
+}

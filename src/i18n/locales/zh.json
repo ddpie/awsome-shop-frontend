@@ -1,0 +1,90 @@
+{
+  "app": {
+    "title": "Awesome 商城"
+  },
+  "nav": {
+    "home": "首页",
+    "notFound": "页面未找到"
+  },
+  "home": {
+    "welcome": "欢迎来到 Awesome 商城",
+    "description": "项目骨架已就绪，开始构建你的电商应用吧。"
+  },
+  "login": {
+    "brand": "AWSome Shop",
+    "brandSubtitle": "员工积分兑换平台",
+    "brandDesc": "用您的积分兑换心仪好物\n简单便捷，触手可得",
+    "title": "欢迎回来",
+    "subtitle": "登录您的账户以继续",
+    "usernameLabel": "用户名",
+    "usernamePlaceholder": "请输入用户名",
+    "passwordLabel": "密码",
+    "passwordPlaceholder": "请输入密码",
+    "loginBtn": "登 录",
+    "loginFailed": "用户名或密码错误",
+    "noAccount": "还没有账户？",
+    "register": "立即注册",
+    "hint": "测试账号：employee / emp123（员工）或 admin / admin123（管理员）"
+  },
+  "employee": {
+    "nav": {
+      "home": "首页",
+      "orders": "兑换记录",
+      "points": "积分中心"
+    },
+    "searchPlaceholder": "输入商品名称搜索...",
+    "search": "搜索",
+    "points": "积分",
+    "heroTitle": "本月精选好物",
+    "heroSubtitle": "用积分兑换您心仪的商品，每月更新",
+    "heroBrowse": "立即浏览",
+    "sold": "已兑换",
+    "soldUnit": "件",
+    "redeem": "兑换"
+  },
+  "admin": {
+    "title": "管理",
+    "welcome": "欢迎",
+    "userLabel": "管理员",
+    "dashboard": "仪表盘",
+    "nav": {
+      "dashboard": "仪表盘",
+      "products": "产品管理",
+      "categories": "分类管理",
+      "points": "积分管理",
+      "orders": "兑换记录",
+      "users": "用户管理"
+    },
+    "metrics": {
+      "totalProducts": "总商品数",
+      "totalUsers": "注册用户",
+      "monthlyRedemptions": "本月兑换",
+      "pointsCirculation": "积分流通"
+    },
+    "recentOrders": "最近兑换记录",
+    "viewAll": "查看全部",
+    "table": {
+      "user": "用户",
+      "product": "商品",
+      "points": "积分",
+      "status": "状态",
+      "time": "时间"
+    }
+  },
+  "menu": {
+    "switchLang": "切换语言",
+    "switchTheme": "切换主题",
+    "logout": "退出登录",
+    "langZh": "中文",
+    "langEn": "English",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "roleEmployee": "员工",
+    "roleAdmin": "管理员"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "抱歉，您访问的页面不存在。",
+    "backHome": "返回首页"
+  }
+}
