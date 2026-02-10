@@ -15,6 +15,12 @@
 | 国际化 | i18next | 25.8 |
 | HTTP 客户端 | Axios | 1.13 |
 
+## 架构总览
+
+<p align="center">
+  <img src="doc/architecture.svg" alt="Frontend Architecture" width="100%" />
+</p>
+
 ## 项目结构
 
 ```
