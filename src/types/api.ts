@@ -126,3 +126,34 @@ export interface ListPointRuleRequest {
   ruleType?: string;
   status?: number;
 }
+
+// ---- Exchange Record ----
+
+export interface ExchangeRecordDTO {
+  id: number;
+  orderNo: string;
+  productName: string;
+  productDesc: string;
+  employeeName: string;
+  pointsCost: number;
+  exchangeTime: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExchangeRecordStatsDTO {
+  totalCount: number;
+  pendingDeliveryCount: number;
+  completedCount: number;
+  totalPointsConsumed: number;
+}
+
+export interface ListExchangeRecordRequest {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  status?: string;
+  startTime?: string;
+  endTime?: string;
+}

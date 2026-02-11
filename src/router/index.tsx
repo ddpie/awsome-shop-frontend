@@ -9,6 +9,7 @@ import ProductList from '../pages/Products';
 import CreateProduct from '../pages/Products/CreateProduct';
 import CategoryList from '../pages/Categories';
 import PointRuleList from '../pages/PointRules';
+import ExchangeRecordList from '../pages/ExchangeRecords';
 import AuthGuard from './AuthGuard';
 
 const router = createBrowserRouter([
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: 'products/create', element: <CreateProduct /> },
       { path: 'categories', element: <CategoryList /> },
       { path: 'points', element: <PointRuleList /> },
+      { path: 'orders', element: <ExchangeRecordList /> },
     ],
   },
   {
