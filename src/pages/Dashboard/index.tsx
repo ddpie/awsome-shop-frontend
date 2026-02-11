@@ -14,6 +14,7 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import GroupIcon from '@mui/icons-material/Group';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import TollIcon from '@mui/icons-material/Toll';
+import AdminPageHeader from '../../components/AdminPageHeader';
 const METRICS = [
   {
     key: 'totalProducts',
@@ -80,11 +81,8 @@ export default function Dashboard() {
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px', p: '32px', flex: 1, overflow: 'auto' }}>
-      {/* Dashboard Header */}
-      <Typography sx={{ fontSize: 24, fontWeight: 700, color: 'text.primary' }}>
-        {t('admin.dashboard')}
-      </Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px', p: '32px' }}>
+      <AdminPageHeader title={t('admin.dashboard')} />
 
       {/* Metric Cards - design: gap 20 */}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>

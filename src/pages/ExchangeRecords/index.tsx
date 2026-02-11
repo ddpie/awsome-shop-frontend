@@ -20,6 +20,7 @@ import RedeemIcon from '@mui/icons-material/Redeem';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import DevicesIcon from '@mui/icons-material/Devices';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import AdminPageHeader from '../../components/AdminPageHeader';
 import {
   listExchangeRecords,
   getExchangeRecordStats,
@@ -138,37 +139,32 @@ export default function ExchangeRecordList() {
   };
 
   return (
-    <Box sx={{ p: '32px', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflow: 'hidden' }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <Typography sx={{ fontSize: 24, fontWeight: 700, color: '#1E293B', fontFamily: 'Inter, sans-serif' }}>
-            {t('admin.exchangeRecords.title')}
-          </Typography>
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontFamily: 'Inter, sans-serif' }}>
-            {t('admin.exchangeRecords.subtitle')}
-          </Typography>
-        </Box>
-        <ButtonBase
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            bgcolor: '#fff',
-            color: '#1E293B',
-            borderRadius: '8px',
-            border: '1px solid #E2E8F0',
-            px: '20px',
-            py: '10px',
-            '&:hover': { bgcolor: '#F8FAFC' },
-          }}
-        >
-          <DownloadIcon sx={{ fontSize: 18 }} />
-          <Typography sx={{ fontSize: 14, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>
-            {t('admin.exchangeRecords.export')}
-          </Typography>
-        </ButtonBase>
-      </Box>
+    <Box sx={{ p: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <AdminPageHeader
+        title={t('admin.exchangeRecords.title')}
+        subtitle={t('admin.exchangeRecords.subtitle')}
+        actions={
+          <ButtonBase
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              bgcolor: '#fff',
+              color: '#1E293B',
+              borderRadius: '8px',
+              border: '1px solid #E2E8F0',
+              px: '20px',
+              py: '10px',
+              '&:hover': { bgcolor: '#F8FAFC' },
+            }}
+          >
+            <DownloadIcon sx={{ fontSize: 18 }} />
+            <Typography sx={{ fontSize: 14, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>
+              {t('admin.exchangeRecords.export')}
+            </Typography>
+          </ButtonBase>
+        }
+      />
 
       {/* Stat Cards */}
       <Box sx={{ display: 'flex', gap: '16px' }}>
@@ -280,7 +276,7 @@ export default function ExchangeRecordList() {
       </Box>
 
       {/* Table card — scrollable */}
-      <Box sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+      <Box>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress />
@@ -356,7 +352,7 @@ export default function ExchangeRecordList() {
 
       {/* Pagination */}
       {total > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: '8px', flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: '8px' }}>
           <Typography sx={{ fontSize: 13, color: '#64748B', fontFamily: 'Inter, sans-serif' }}>
             {t('admin.exchangeRecords.showRange', { start, end, total })}
           </Typography>

@@ -67,10 +67,10 @@ export default function AvatarMenu() {
     <>
       <Avatar
         sx={{
-          width: 36,
-          height: 36,
+          width: 40,
+          height: 40,
           bgcolor: 'primary.main',
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: 600,
           cursor: 'pointer',
         }}

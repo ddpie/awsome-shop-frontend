@@ -10,7 +10,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import TollIcon from '@mui/icons-material/Toll';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import GroupIcon from '@mui/icons-material/Group';
-import AvatarMenu from '../AvatarMenu';
+// AvatarMenu is rendered by AdminPageHeader inside each page
 
 const SIDEBAR_WIDTH = 240;
 
@@ -101,28 +101,11 @@ export default function AdminLayout() {
       <Box
         sx={{
           flexGrow: 1,
-          overflow: 'auto',
           bgcolor: '#F8FAFC',
-          display: 'flex',
-          flexDirection: 'column',
+          overflow: 'auto',
         }}
       >
-        {/* Top Header Bar */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            height: 64,
-            px: 4,
-            flexShrink: 0,
-          }}
-        >
-          <AvatarMenu />
-        </Box>
-        <Box sx={{ flexGrow: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <Outlet />
-        </Box>
+        <Outlet />
       </Box>
     </Box>
   );

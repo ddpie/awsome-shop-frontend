@@ -18,6 +18,7 @@ import CelebrationIcon from '@mui/icons-material/Celebration';
 import StarIcon from '@mui/icons-material/Star';
 import { listPointRules } from '../../services/api/pointRule';
 import type { PointRuleDTO, PageResult } from '../../types/api';
+import AdminPageHeader from '../../components/AdminPageHeader';
 
 // ---- Rule type styling ----
 
@@ -91,36 +92,31 @@ export default function PointRuleList() {
   const enabledCount = rules.filter((r) => r.status === 1).length;
 
   return (
-    <Box sx={{ p: '32px', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflow: 'hidden' }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <Typography sx={{ fontSize: 24, fontWeight: 700, color: '#1E293B', fontFamily: 'Inter, sans-serif' }}>
-            {t('admin.pointRules.title')}
-          </Typography>
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontFamily: 'Inter, sans-serif' }}>
-            {t('admin.pointRules.subtitle')}
-          </Typography>
-        </Box>
-        <ButtonBase
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            bgcolor: '#2563EB',
-            color: '#fff',
-            borderRadius: '8px',
-            px: '20px',
-            py: '10px',
-            '&:hover': { bgcolor: '#1D4ED8' },
-          }}
-        >
-          <AddIcon sx={{ fontSize: 18 }} />
-          <Typography sx={{ fontSize: 14, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>
-            {t('admin.pointRules.addRule')}
-          </Typography>
-        </ButtonBase>
-      </Box>
+    <Box sx={{ p: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <AdminPageHeader
+        title={t('admin.pointRules.title')}
+        subtitle={t('admin.pointRules.subtitle')}
+        actions={
+          <ButtonBase
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              bgcolor: '#2563EB',
+              color: '#fff',
+              borderRadius: '8px',
+              px: '20px',
+              py: '10px',
+              '&:hover': { bgcolor: '#1D4ED8' },
+            }}
+          >
+            <AddIcon sx={{ fontSize: 18 }} />
+            <Typography sx={{ fontSize: 14, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>
+              {t('admin.pointRules.addRule')}
+            </Typography>
+          </ButtonBase>
+        }
+      />
 
       {/* Stat Cards */}
       <Box sx={{ display: 'flex', gap: '16px' }}>
@@ -131,7 +127,7 @@ export default function PointRuleList() {
       </Box>
 
       {/* Table card — scrollable */}
-      <Box sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+      <Box>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress />
@@ -202,7 +198,7 @@ export default function PointRuleList() {
 
       {/* Pagination */}
       {total > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: '8px', flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: '8px' }}>
           <Typography sx={{ fontSize: 13, color: '#64748B', fontFamily: 'Inter, sans-serif' }}>
             {t('admin.pointRules.showRange', { start, end, total })}
           </Typography>

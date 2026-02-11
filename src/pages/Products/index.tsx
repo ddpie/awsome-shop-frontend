@@ -17,6 +17,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import { listProducts } from '../../services/api/product';
 import type { ProductDTO } from '../../types/api';
+import AdminPageHeader from '../../components/AdminPageHeader';
 
 const PAGE_SIZE = 8;
 
@@ -99,32 +100,31 @@ export default function ProductList() {
   };
 
   return (
-    <Box sx={{ p: '32px', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflow: 'hidden' }}>
-      {/* Header: title + add button */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography sx={{ fontSize: 24, fontWeight: 700, color: '#1E293B', fontFamily: 'Inter, sans-serif' }}>
-          {t('admin.products.title')}
-        </Typography>
-        <ButtonBase
-          onClick={() => navigate('/admin/products/create')}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            bgcolor: '#2563EB',
-            color: '#fff',
-            borderRadius: '8px',
-            px: '20px',
-            py: '10px',
-            '&:hover': { bgcolor: '#1D4ED8' },
-          }}
-        >
-          <AddIcon sx={{ fontSize: 18 }} />
-          <Typography sx={{ fontSize: 14, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>
-            {t('admin.products.addProduct')}
-          </Typography>
-        </ButtonBase>
-      </Box>
+    <Box sx={{ p: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <AdminPageHeader
+        title={t('admin.products.title')}
+        actions={
+          <ButtonBase
+            onClick={() => navigate('/admin/products/create')}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              bgcolor: '#2563EB',
+              color: '#fff',
+              borderRadius: '8px',
+              px: '20px',
+              py: '10px',
+              '&:hover': { bgcolor: '#1D4ED8' },
+            }}
+          >
+            <AddIcon sx={{ fontSize: 18 }} />
+            <Typography sx={{ fontSize: 14, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>
+              {t('admin.products.addProduct')}
+            </Typography>
+          </ButtonBase>
+        }
+      />
 
       {/* Toolbar: search + filter + count */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -190,7 +190,7 @@ export default function ProductList() {
       </Box>
 
       {/* Product card grid — scrollable area */}
-      <Box sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+      <Box>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress />
@@ -221,7 +221,7 @@ export default function ProductList() {
 
       {/* Pagination — fixed at bottom */}
       {totalPages > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: '8px', flexShrink: 0 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: '8px' }}>
           <Typography sx={{ fontSize: 13, color: '#64748B', fontFamily: 'Inter, sans-serif' }}>
             {t('admin.products.showRange', { start, end, total })}
           </Typography>
