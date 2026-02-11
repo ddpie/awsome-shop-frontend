@@ -103,3 +103,26 @@ export interface ListCategoryRequest {
   name?: string;
   status?: number;
 }
+
+// ---- Point Rule ----
+
+export interface PointRuleDTO {
+  id: number;
+  name: string;
+  description: string;
+  ruleType: string;
+  pointValueMin: number;
+  pointValueMax: number;
+  triggerCondition: string;
+  status: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListPointRuleRequest {
+  page?: number;
+  size?: number;
+  name?: string;
+  ruleType?: string;
+  status?: number;
+}

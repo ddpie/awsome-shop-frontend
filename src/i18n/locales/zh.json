@@ -132,6 +132,28 @@
       "enable": "启用",
       "delete": "删除",
       "noCategories": "暂无类目"
+    },
+    "pointRules": {
+      "title": "积分规则管理",
+      "subtitle": "配置员工积分发放规则，管理各类型积分策略",
+      "addRule": "新增规则",
+      "statTotal": "规则总数",
+      "statEnabled": "已启用",
+      "statMonthly": "本月发放",
+      "statEmployees": "覆盖员工",
+      "thName": "规则名称",
+      "thType": "规则类型",
+      "thPoints": "积分值",
+      "thCondition": "触发条件",
+      "thStatus": "状态",
+      "thActions": "操作",
+      "statusEnabled": "启用",
+      "statusDisabled": "禁用",
+      "edit": "编辑",
+      "disable": "禁用",
+      "enable": "启用",
+      "showRange": "显示 {{start}}-{{end}} 共 {{total}} 条规则",
+      "noRules": "暂无积分规则"
     }
   },
   "menu": {

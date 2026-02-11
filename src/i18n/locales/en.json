@@ -132,6 +132,28 @@
       "enable": "Enable",
       "delete": "Delete",
       "noCategories": "No categories found"
+    },
+    "pointRules": {
+      "title": "Points Rule Management",
+      "subtitle": "Configure employee points distribution rules and manage strategies",
+      "addRule": "Add Rule",
+      "statTotal": "Total Rules",
+      "statEnabled": "Enabled",
+      "statMonthly": "Monthly Issued",
+      "statEmployees": "Covered Employees",
+      "thName": "Rule Name",
+      "thType": "Rule Type",
+      "thPoints": "Points",
+      "thCondition": "Trigger Condition",
+      "thStatus": "Status",
+      "thActions": "Actions",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "edit": "Edit",
+      "disable": "Disable",
+      "enable": "Enable",
+      "showRange": "Showing {{start}}-{{end}} of {{total}} rules",
+      "noRules": "No point rules found"
     }
   },
   "menu": {
