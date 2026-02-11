@@ -52,9 +52,9 @@ export default function AvatarMenu() {
     handleClose();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleClose();
-    logout();
+    await logout();
     navigate('/login');
   };
 

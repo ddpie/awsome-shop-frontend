@@ -5,6 +5,8 @@ import EmployeeLayout from '../components/Layout/EmployeeLayout';
 import AdminLayout from '../components/Layout/AdminLayout';
 import ShopHome from '../pages/ShopHome';
 import Dashboard from '../pages/Dashboard';
+import ProductList from '../pages/Products';
+import CreateProduct from '../pages/Products/CreateProduct';
 import AuthGuard from './AuthGuard';
 
 const router = createBrowserRouter([
@@ -34,6 +36,8 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Dashboard /> },
+      { path: 'products', element: <ProductList /> },
+      { path: 'products/create', element: <CreateProduct /> },
     ],
   },
   {

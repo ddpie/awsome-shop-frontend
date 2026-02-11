@@ -80,7 +80,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px', p: '32px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px', p: '32px', flex: 1, overflow: 'auto' }}>
       {/* Dashboard Header */}
       <Typography sx={{ fontSize: 24, fontWeight: 700, color: 'text.primary' }}>
         {t('admin.dashboard')}

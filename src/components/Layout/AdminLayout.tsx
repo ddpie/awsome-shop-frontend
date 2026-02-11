@@ -120,7 +120,7 @@ export default function AdminLayout() {
         >
           <AvatarMenu />
         </Box>
-        <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+        <Box sx={{ flexGrow: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <Outlet />
         </Box>
       </Box>

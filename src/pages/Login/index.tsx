@@ -10,6 +10,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -17,6 +18,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import { useAuthStore } from '../../store/useAuthStore';
 import { getTheme } from '../../theme';
+import { BusinessError } from '../../services/request';
 
 export default function Login() {
   const { t, i18n } = useTranslation();
@@ -42,16 +44,24 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleLogin = async () => {
-    setError(false);
-    const success = await login(username, password);
-    if (success) {
+    setErrorMsg('');
+    setLoading(true);
+    try {
+      await login(username, password);
       const user = useAuthStore.getState().user;
       navigate(user?.role === 'admin' ? '/admin' : '/');
-    } else {
-      setError(true);
+    } catch (err) {
+      if (err instanceof BusinessError) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg(t('login.loginFailed'));
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,15 +152,12 @@ export default function Login() {
             </Typography>
           </Box>
 
-          {/* Error & Hint */}
-          {error && (
+          {/* Error */}
+          {errorMsg && (
             <Alert severity="error" sx={{ borderRadius: 2 }}>
-              {t('login.loginFailed')}
+              {errorMsg}
             </Alert>
           )}
-          <Alert severity="info" sx={{ borderRadius: 2, fontSize: 13 }}>
-            {t('login.hint')}
-          </Alert>
 
           {/* Form Fields */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
@@ -250,6 +257,7 @@ export default function Login() {
             variant="contained"
             fullWidth
             onClick={handleLogin}
+            disabled={loading || !username || !password}
             sx={{
               height: 48,
               borderRadius: '8px',
@@ -259,7 +267,7 @@ export default function Login() {
               textTransform: 'none',
             }}
           >
-            {t('login.loginBtn')}
+            {loading ? <CircularProgress size={24} color="inherit" /> : t('login.loginBtn')}
           </Button>
 
           {/* Register Link */}
