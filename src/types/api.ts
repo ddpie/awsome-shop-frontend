@@ -84,3 +84,22 @@ export interface CreateProductRequest {
   colors?: string;
   specs?: Record<string, string>[];
 }
+
+// ---- Category ----
+
+export interface CategoryDTO {
+  id: number;
+  name: string;
+  parentId: number | null;
+  icon: string;
+  sortOrder: number;
+  status: number;
+  description: string;
+  productCount: number;
+  children: CategoryDTO[];
+}
+
+export interface ListCategoryRequest {
+  name?: string;
+  status?: number;
+}

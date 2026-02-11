@@ -111,6 +111,27 @@
       "create": "创建商品",
       "createSuccess": "商品创建成功",
       "createFailed": "商品创建失败"
+    },
+    "categories": {
+      "title": "类目管理",
+      "addCategory": "新增类目",
+      "searchPlaceholder": "搜索类目名称...",
+      "allStatus": "全部状态",
+      "totalCount": "共 {{count}} 个类目",
+      "showRange": "显示 {{start}}-{{end}} 共 {{total}} 个类目",
+      "thName": "类目名称",
+      "thProductCount": "商品数量",
+      "thSortOrder": "排序权重",
+      "thStatus": "状态",
+      "thActions": "操作",
+      "statusEnabled": "启用",
+      "statusDisabled": "禁用",
+      "edit": "编辑",
+      "addSub": "添加子类",
+      "disable": "禁用",
+      "enable": "启用",
+      "delete": "删除",
+      "noCategories": "暂无类目"
     }
   },
   "menu": {

@@ -7,6 +7,7 @@ import ShopHome from '../pages/ShopHome';
 import Dashboard from '../pages/Dashboard';
 import ProductList from '../pages/Products';
 import CreateProduct from '../pages/Products/CreateProduct';
+import CategoryList from '../pages/Categories';
 import AuthGuard from './AuthGuard';
 
 const router = createBrowserRouter([
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
       { index: true, element: <Dashboard /> },
       { path: 'products', element: <ProductList /> },
       { path: 'products/create', element: <CreateProduct /> },
+      { path: 'categories', element: <CategoryList /> },
     ],
   },
   {

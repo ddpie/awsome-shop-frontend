@@ -111,6 +111,27 @@
       "create": "Create Product",
       "createSuccess": "Product created successfully",
       "createFailed": "Failed to create product"
+    },
+    "categories": {
+      "title": "Category Management",
+      "addCategory": "Add Category",
+      "searchPlaceholder": "Search category name...",
+      "allStatus": "All Status",
+      "totalCount": "{{count}} categories total",
+      "showRange": "Showing {{start}}-{{end}} of {{total}} categories",
+      "thName": "Category Name",
+      "thProductCount": "Products",
+      "thSortOrder": "Sort Order",
+      "thStatus": "Status",
+      "thActions": "Actions",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "edit": "Edit",
+      "addSub": "Add Sub",
+      "disable": "Disable",
+      "enable": "Enable",
+      "delete": "Delete",
+      "noCategories": "No categories found"
     }
   },
   "menu": {
