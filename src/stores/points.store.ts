@@ -11,7 +11,7 @@ interface PointsState {
   error: string | null;
 
   fetchBalance: () => Promise<void>;
-  fetchTransactions: (params?: { page?: number; size?: number }) => Promise<void>;
+  fetchTransactions: (params?: { page?: number; size?: number; type?: 'EARN' | 'SPEND' }) => Promise<void>;
   clearError: () => void;
 }
 
@@ -24,7 +24,7 @@ export const usePointsStore = create<PointsState>((set) => ({
 
   fetchBalance: async () => {
     try {
-      const balance = await pointsService.getMyBalance();
+      const balance = await pointsService.getBalance();
       set({ balance });
     } catch (e: unknown) {
       set({ error: (e as Error).message });
@@ -34,7 +34,7 @@ export const usePointsStore = create<PointsState>((set) => ({
   fetchTransactions: async (params) => {
     set({ loading: true, error: null });
     try {
-      const result = await pointsService.getMyTransactions(params);
+      const result = await pointsService.getTransactions(params);
       const { content, ...pagination } = result;
       set({ transactions: content, pagination });
     } catch (e: unknown) {

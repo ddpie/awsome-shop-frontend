@@ -1,34 +1,59 @@
 import { create } from 'zustand';
 import { productService, categoryService } from '../services/product.service';
-import type { Product, Category, ProductListParams, PageResult } from '../types/product.types';
+import type { Product, Category, ProductListParams, AdminProductListParams, PageResult } from '../types/product.types';
 
 interface ProductState {
   products: Product[];
   categories: Category[];
   currentProduct: Product | null;
+  relatedProducts: Product[];
   pagination: Omit<PageResult<unknown>, 'content'>;
   loading: boolean;
   categoryLoading: boolean;
   error: string | null;
 
+  // Admin state
+  adminProducts: Product[];
+  adminCurrentProduct: Product | null;
+  adminLoading: boolean;
+  adminError: string | null;
+  adminPagination: Omit<PageResult<unknown>, 'content'>;
+
   fetchProducts: (params?: ProductListParams) => Promise<void>;
   fetchProduct: (id: number) => Promise<void>;
+  fetchProductById: (id: string) => Promise<void>;
+  fetchRelatedProducts: (category: string, excludeId: string) => Promise<void>;
   fetchCategories: () => Promise<void>;
   createCategory: (data: { name: string; sortWeight: number; parentId?: number | null }) => Promise<void>;
   updateCategory: (id: number, data: { name: string; sortWeight: number }) => Promise<void>;
   deleteCategory: (id: number) => Promise<void>;
   toggleCategoryStatus: (id: number, status: 'active' | 'inactive') => Promise<void>;
   clearError: () => void;
+
+  // Admin actions
+  fetchAdminProducts: (params?: AdminProductListParams) => Promise<void>;
+  fetchAdminProductById: (id: string) => Promise<void>;
+  createAdminProduct: (data: Partial<Product>) => Promise<Product>;
+  updateAdminProduct: (id: string, data: Partial<Product>) => Promise<void>;
+  deleteAdminProduct: (id: string) => Promise<void>;
+  clearAdminError: () => void;
 }
 
 export const useProductStore = create<ProductState>((set, get) => ({
   products: [],
   categories: [],
   currentProduct: null,
+  relatedProducts: [],
   pagination: { totalElements: 0, totalPages: 0, page: 0, size: 20 },
   loading: false,
   categoryLoading: false,
   error: null,
+
+  adminProducts: [],
+  adminCurrentProduct: null,
+  adminLoading: false,
+  adminError: null,
+  adminPagination: { totalElements: 0, totalPages: 0, page: 0, size: 20 },
 
   fetchProducts: async (params) => {
     set({ loading: true, error: null });
@@ -52,6 +77,28 @@ export const useProductStore = create<ProductState>((set, get) => ({
       set({ error: (e as Error).message });
     } finally {
       set({ loading: false });
+    }
+  },
+
+  fetchProductById: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const product = await productService.getProductById(id);
+      set({ currentProduct: product });
+    } catch (e: unknown) {
+      set({ error: (e as Error).message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchRelatedProducts: async (category, excludeId) => {
+    try {
+      const result = await productService.getProducts({ category, page: 0, size: 4 });
+      const related = result.content.filter((p) => String(p.id) !== excludeId);
+      set({ relatedProducts: related.slice(0, 3) });
+    } catch {
+      set({ relatedProducts: [] });
     }
   },
 
@@ -102,4 +149,52 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  // Admin actions
+  fetchAdminProducts: async (params) => {
+    set({ adminLoading: true, adminError: null });
+    try {
+      const result = await productService.adminGetProducts(params);
+      const { content, ...pagination } = result;
+      set({ adminProducts: content, adminPagination: pagination });
+    } catch (e: unknown) {
+      set({ adminError: (e as Error).message });
+    } finally {
+      set({ adminLoading: false });
+    }
+  },
+
+  fetchAdminProductById: async (id) => {
+    set({ adminLoading: true, adminError: null });
+    try {
+      const product = await productService.adminGetProductById(id);
+      set({ adminCurrentProduct: product });
+    } catch (e: unknown) {
+      set({ adminError: (e as Error).message });
+    } finally {
+      set({ adminLoading: false });
+    }
+  },
+
+  createAdminProduct: async (data) => {
+    const product = await productService.adminCreateProduct(data);
+    return product;
+  },
+
+  updateAdminProduct: async (id, data) => {
+    await productService.adminUpdateProduct(id, data);
+    const current = get().adminCurrentProduct;
+    if (current && String(current.id) === id) {
+      set({ adminCurrentProduct: { ...current, ...data } });
+    }
+  },
+
+  deleteAdminProduct: async (id) => {
+    await productService.adminDeleteProduct(id);
+    set((state) => ({
+      adminProducts: state.adminProducts.filter((p) => String(p.id) !== id),
+    }));
+  },
+
+  clearAdminError: () => set({ adminError: null }),
 }));

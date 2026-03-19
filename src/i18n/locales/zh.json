@@ -45,6 +45,7 @@
       "tabShipped": "已发货",
       "tabCompleted": "已完成",
       "tabCancelled": "已取消",
+      "empty": "暂无订单记录",
       "statusPending": "待处理",
       "statusShipped": "已发货",
       "statusCompleted": "已完成",
@@ -74,6 +75,9 @@
       "recipient": "收货人",
       "address": "收货地址",
       "confirmBtn": "确认兑换",
+      "confirming": "提交中...",
+      "outOfStock": "库存不足",
+      "insufficientPoints": "积分余额不足，无法完成兑换",
       "backBtn": "返回商品",
       "currentPoints": "当前积分",
       "afterRedemption": "兑换后剩余",
@@ -92,6 +96,7 @@
     "heroBrowse": "立即浏览",
     "sold": "已兑换",
     "soldUnit": "件",
+    "noProducts": "暂无商品",
     "redeem": "兑换",
     "category": {
       "all": "全部",
@@ -119,6 +124,7 @@
       "tabEarn": "收入",
       "tabSpend": "支出",
       "viewMore": "查看更多",
+      "noTransactions": "暂无记录",
       "income": "收入",
       "expense": "消费",
       "balance": "余额",
@@ -150,7 +156,8 @@
       "relatedProducts": "相关推荐",
       "viewMore": "查看更多",
       "rating": "条评价",
-      "sold": "已售 {{count}} 件"
+      "sold": "已售 {{count}} 件",
+      "notFound": "商品不存在"
     },
     "delivery": {
       "title": "填写收货信息",
@@ -179,7 +186,9 @@
       "delivery": "预计送达",
       "viewOrders": "查看订单详情",
       "backHome": "返回商城首页",
-      "continueShopping": "继续逛逛"
+      "continueShopping": "继续逛逛",
+      "noData": "未找到订单信息，请从兑换流程重新进入",
+      "deliveryDays": "3-5 个工作日"
     },
     "orderDetail": {
       "title": "订单详情",
@@ -195,6 +204,7 @@
       "payTime": "支付时间",
       "platform": "下单平台",
       "remark": "订单备注",
+      "phone": "联系电话",
       "backToList": "返回列表"
     }
   },
@@ -238,7 +248,9 @@
       "active": "上架",
       "inactive": "下架",
       "stock": "库存",
-      "confirmDelete": "确认删除「{{name}}」？此操作不可撤销。"
+      "confirmDelete": "确认删除「{{name}}」？此操作不可撤销。",
+      "noData": "暂无商品数据",
+      "showingRange": "显示第 {{from}}-{{to}} 条，共 {{total}} 件产品"
     },
     "productDetail": {
       "breadcrumb": "商品详情",
@@ -293,7 +305,8 @@
       "adjustDelta": "调整数量（正数增加，负数减少）",
       "unit": "件",
       "lowStock": "库存紧张",
-      "confirmDelete": "确认删除此商品？此操作不可撤销。"
+      "confirmDelete": "确认删除此商品？此操作不可撤销。",
+      "uploadError": "上传失败，请重试"
     },
     "orders": {
       "title": "兑换记录管理",
@@ -317,7 +330,10 @@
       "statusPending": "待发货",
       "statusShipped": "已发货",
       "statusCompleted": "已完成",
-      "statusCancelled": "已取消"
+      "statusCancelled": "已取消",
+      "detail": "详情",
+      "noData": "暂无订单记录",
+      "showingRange": "显示第 {{from}}-{{to}} 条，共 {{total}} 条记录"
     },
     "users": {
       "title": "用户管理",
@@ -340,7 +356,23 @@
       "statusActive": "正常",
       "statusDisabled": "禁用",
       "editUser": "编辑用户",
-      "adjustPoints": "积分调整"
+      "adjustPoints": "积分调整",
+      "disableUser": "禁用用户",
+      "enableUser": "启用用户",
+      "noData": "暂无用户数据",
+      "showingRange": "显示第 {{from}}-{{to}} 条，共 {{total}} 名员工",
+      "enabledSuccess": "用户已启用",
+      "disabledSuccess": "用户已禁用",
+      "statusUpdateFailed": "状态更新失败",
+      "adjustSuccess": "积分调整成功",
+      "adjustFailed": "积分调整失败",
+      "exportComingSoon": "导出功能即将上线",
+      "editComingSoon": "编辑功能即将上线",
+      "adjustPointsTitle": "调整积分 — {{name}}",
+      "adjustAmountLabel": "调整数量",
+      "adjustAmountHint": "正数为增加，负数为扣减",
+      "adjustReasonLabel": "调整原因",
+      "adjustReasonPlaceholder": "如：Q1绩效奖励"
     },
     "categories": {
       "title": "类目管理",
@@ -395,7 +427,53 @@
       "deliveryInfo": "收货信息",
       "orderInfo": "订单信息",
       "statusTimeline": "状态跟踪",
-      "updateStatus": "修改发货状态"
+      "updateStatus": "修改发货状态",
+      "employeeName": "员工姓名",
+      "employeeId": "员工 ID",
+      "qty": "数量：{{count}}",
+      "timelineCreated": "兑换申请提交",
+      "timelineShipped": "管理员确认发货",
+      "timelineCompleted": "完成",
+      "notFound": "订单不存在"
+    },
+    "productEdit": {
+      "breadcrumbNew": "新增商品",
+      "breadcrumbEdit": "编辑商品",
+      "titleNew": "新增商品信息",
+      "titleEdit": "编辑商品信息",
+      "basicInfo": "基本信息",
+      "images": "商品图片",
+      "uploadImage": "上传图片",
+      "removeImage": "移除图片",
+      "name": "商品名称",
+      "namePlaceholder": "请输入商品名称",
+      "sku": "商品序号 (SKU)",
+      "category": "商品分类 / 标签组",
+      "categoryPlaceholder": "请选择分类",
+      "brand": "品牌",
+      "points": "积分价格",
+      "originalPrice": "原始市场价（参考）",
+      "stock": "库存数量",
+      "description": "商品描述",
+      "descriptionPlaceholder": "请输入商品描述...",
+      "specs": "规格参数",
+      "addSpec": "成品规格",
+      "specKey": "规格名称",
+      "specValue": "规格值",
+      "cancel": "返回",
+      "save": "保存商品",
+      "saveError": "保存失败，请重试",
+      "uploadDialog": {
+        "title": "上传商品图片",
+        "dropHint": "将图片拖拽至此处，或点击上传",
+        "formatHint": "支持 JPG、PNG、WebP 格式，单张不超过 5 MB",
+        "selectFile": "选择文件",
+        "uploaded": "已上传图片",
+        "selectHint": "点击选择",
+        "cancel": "取消",
+        "confirm": "确认选择",
+        "uploadError": "上传失败，请重试"
+      }
     },
     "userPoints": {
       "title": "的积分变动记录",
@@ -407,7 +485,13 @@
       "colAmount": "积分变动",
       "colBalance": "变动后余额",
       "colDesc": "变动说明",
-      "colOperator": "操作人"
+      "colOperator": "操作人",
+      "statCurrent": "当前积分",
+      "statEarned": "累计获得",
+      "statSpent": "累计消费",
+      "statCount": "兑换次数",
+      "noData": "暂无交易记录",
+      "showingRange": "显示第 {{from}}-{{to}} 条，共 {{total}} 条记录"
     },
     "pointsRules": {
       "subtitle": "管理员工积分发放规则，配置触发条件与积分数量",

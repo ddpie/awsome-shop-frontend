@@ -37,6 +37,7 @@
       "tabShipped": "Shipped",
       "tabCompleted": "Completed",
       "tabCancelled": "Cancelled",
+      "empty": "No orders found",
       "statusPending": "Pending",
       "statusShipped": "Shipped",
       "statusCompleted": "Completed",
@@ -66,6 +67,9 @@
       "recipient": "Recipient",
       "address": "Address",
       "confirmBtn": "Confirm Redemption",
+      "confirming": "Submitting...",
+      "outOfStock": "Out of Stock",
+      "insufficientPoints": "Insufficient points balance to complete this redemption",
       "backBtn": "Back to Product",
       "currentPoints": "Current Points",
       "afterRedemption": "Remaining after redemption",
@@ -84,6 +88,7 @@
     "heroBrowse": "Browse Now",
     "sold": "Redeemed",
     "soldUnit": "",
+    "noProducts": "No products found",
     "redeem": "Redeem",
     "category": {
       "all": "All",
@@ -111,6 +116,7 @@
       "tabEarn": "Earned",
       "tabSpend": "Spent",
       "viewMore": "View More",
+      "noTransactions": "No records found",
       "income": "Income",
       "expense": "Expense",
       "balance": "Balance",
@@ -142,7 +148,8 @@
       "relatedProducts": "Related Products",
       "viewMore": "View More",
       "rating": "reviews",
-      "sold": "{{count}} redeemed"
+      "sold": "{{count}} redeemed",
+      "notFound": "Product not found"
     },
     "delivery": {
       "title": "Delivery Information",
@@ -171,7 +178,9 @@
       "delivery": "Estimated Delivery",
       "viewOrders": "View Order Details",
       "backHome": "Back to Shop",
-      "continueShopping": "Continue Shopping"
+      "continueShopping": "Continue Shopping",
+      "noData": "No order info found. Please go through the redemption flow again.",
+      "deliveryDays": "3-5 business days"
     },
     "orderDetail": {
       "title": "Order Detail",
@@ -187,6 +196,7 @@
       "payTime": "Payment Time",
       "platform": "Platform",
       "remark": "Remark",
+      "phone": "Phone",
       "backToList": "Back to List"
     }
   },
@@ -252,7 +262,8 @@
       "adjustDelta": "Adjustment (positive = add, negative = reduce)",
       "unit": "pcs",
       "lowStock": "Low Stock",
-      "confirmDelete": "Delete this product? This cannot be undone."
+      "confirmDelete": "Delete this product? This cannot be undone.",
+      "uploadError": "Upload failed, please try again"
     },
     "products": {
       "title": "Product Management",
@@ -266,7 +277,9 @@
       "active": "Active",
       "inactive": "Inactive",
       "stock": "Stock",
-      "confirmDelete": "Delete \"{{name}}\"? This cannot be undone."
+      "confirmDelete": "Delete \"{{name}}\"? This cannot be undone.",
+      "noData": "No products found",
+      "showingRange": "Showing {{from}}-{{to}} of {{total}} products"
     },
     "title": "Admin",
     "welcome": "Welcome",
@@ -317,7 +330,10 @@
       "statusPending": "Pending",
       "statusShipped": "Shipped",
       "statusCompleted": "Completed",
-      "statusCancelled": "Cancelled"
+      "statusCancelled": "Cancelled",
+      "detail": "Detail",
+      "noData": "No orders found",
+      "showingRange": "Showing {{from}}-{{to}} of {{total}} records"
     },
     "users": {
       "title": "User Management",
@@ -340,7 +356,23 @@
       "statusActive": "Active",
       "statusDisabled": "Disabled",
       "editUser": "Edit User",
-      "adjustPoints": "Adjust Points"
+      "adjustPoints": "Adjust Points",
+      "disableUser": "Disable User",
+      "enableUser": "Enable User",
+      "noData": "No users found",
+      "showingRange": "Showing {{from}}-{{to}} of {{total}} employees",
+      "enabledSuccess": "User enabled",
+      "disabledSuccess": "User disabled",
+      "statusUpdateFailed": "Failed to update status",
+      "adjustSuccess": "Points adjusted successfully",
+      "adjustFailed": "Failed to adjust points",
+      "exportComingSoon": "Export coming soon",
+      "editComingSoon": "Edit coming soon",
+      "adjustPointsTitle": "Adjust Points — {{name}}",
+      "adjustAmountLabel": "Amount",
+      "adjustAmountHint": "Positive to add, negative to deduct",
+      "adjustReasonLabel": "Reason",
+      "adjustReasonPlaceholder": "e.g. Performance bonus Q1"
     },
     "categories": {
       "title": "Category Management",
@@ -395,7 +427,53 @@
       "deliveryInfo": "Delivery Info",
       "orderInfo": "Order Info",
       "statusTimeline": "Status Timeline",
-      "updateStatus": "Update Shipment Status"
+      "updateStatus": "Update Shipment Status",
+      "employeeName": "Employee Name",
+      "employeeId": "Employee ID",
+      "qty": "Qty: {{count}}",
+      "timelineCreated": "Order Submitted",
+      "timelineShipped": "Shipped by Admin",
+      "timelineCompleted": "Completed",
+      "notFound": "Order not found"
+    },
+    "productEdit": {
+      "breadcrumbNew": "New Product",
+      "breadcrumbEdit": "Edit Product",
+      "titleNew": "Add New Product",
+      "titleEdit": "Edit Product Info",
+      "basicInfo": "Basic Info",
+      "images": "Product Images",
+      "uploadImage": "Upload Image",
+      "removeImage": "Remove Image",
+      "name": "Product Name",
+      "namePlaceholder": "Enter product name",
+      "sku": "SKU",
+      "category": "Category",
+      "categoryPlaceholder": "Select category",
+      "brand": "Brand",
+      "points": "Points Price",
+      "originalPrice": "Market Price (Reference)",
+      "stock": "Stock Quantity",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter product description...",
+      "specs": "Specifications",
+      "addSpec": "Add Spec",
+      "specKey": "Spec Name",
+      "specValue": "Spec Value",
+      "cancel": "Back",
+      "save": "Save Product",
+      "saveError": "Save failed, please try again",
+      "uploadDialog": {
+        "title": "Upload Product Images",
+        "dropHint": "Drag images here, or click to upload",
+        "formatHint": "Supports JPG, PNG, WebP. Max 5MB per file.",
+        "selectFile": "Select File",
+        "uploaded": "Uploaded Images",
+        "selectHint": "Click to select",
+        "cancel": "Cancel",
+        "confirm": "Confirm Selection",
+        "uploadError": "Upload failed, please try again"
+      }
     },
     "userPoints": {
       "title": "'s Points History",
@@ -407,7 +485,13 @@
       "colAmount": "Amount",
       "colBalance": "Balance After",
       "colDesc": "Description",
-      "colOperator": "Operator"
+      "colOperator": "Operator",
+      "statCurrent": "Current Points",
+      "statEarned": "Total Earned",
+      "statSpent": "Total Spent",
+      "statCount": "Redemptions",
+      "noData": "No transactions found",
+      "showingRange": "Showing {{from}}-{{to}} of {{total}} records"
     },
     "pointsRules": {
       "title": "Points Rule Management",

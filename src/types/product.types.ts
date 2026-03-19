@@ -21,15 +21,30 @@ export interface Product {
   rating?: number;
   reviewCount?: number;
   soldCount?: number;
-  status: 'active' | 'inactive';
+  status: 'ACTIVE' | 'INACTIVE' | 'active' | 'inactive';
   createdAt?: string;
+  updatedAt?: string;
+  // Admin-facing fields
+  sku?: string;
+  brand?: string;
+  originalPrice?: number;
+  specs?: { key: string; value: string }[];
 }
 
 export interface ProductListParams {
   page?: number;
   size?: number;
   categoryId?: number;
+  category?: string;
   keyword?: string;
+  status?: string;
+}
+
+export interface AdminProductListParams {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  category?: string;
   status?: string;
 }
 

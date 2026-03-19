@@ -1,14 +1,19 @@
 import http from './http';
-import type { Product, Category, ProductListParams, PageResult } from '../types/product.types';
+import type { Product, Category, ProductListParams, PageResult, AdminProductListParams } from '../types/product.types';
 
 export const productService = {
+  // Employee-facing
   getProducts: (params?: ProductListParams): Promise<PageResult<Product>> =>
-    http.get('/v1/product/list', { params }),
+    http.get('/v1/product', { params }),
 
+  getProductById: (id: string): Promise<Product> =>
+    http.get(`/v1/product/${id}`),
+
+  // Legacy alias used by admin pages
   getProduct: (id: number): Promise<Product> =>
     http.get(`/v1/product/${id}`),
 
-  // Admin only
+  // Admin only (employee-facing legacy)
   createProduct: (data: Partial<Product>): Promise<Product> =>
     http.post('/v1/product', data),
 
@@ -17,6 +22,30 @@ export const productService = {
 
   deleteProduct: (id: number): Promise<void> =>
     http.delete(`/v1/product/${id}`),
+
+  // Admin product management
+  adminGetProducts: (params?: AdminProductListParams): Promise<PageResult<Product>> =>
+    http.get('/v1/product/admin/products', { params }),
+
+  adminGetProductById: (id: string): Promise<Product> =>
+    http.get(`/v1/product/admin/products/${id}`),
+
+  adminCreateProduct: (data: Partial<Product>): Promise<Product> =>
+    http.post('/v1/product/admin/products', data),
+
+  adminUpdateProduct: (id: string, data: Partial<Product>): Promise<Product> =>
+    http.put(`/v1/product/admin/products/${id}`, data),
+
+  adminDeleteProduct: (id: string): Promise<void> =>
+    http.delete(`/v1/product/admin/products/${id}`),
+
+  uploadProductImage: (file: File): Promise<{ url: string }> => {
+    const form = new FormData();
+    form.append('file', file);
+    return http.post('/v1/product/file/upload', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 export const categoryService = {

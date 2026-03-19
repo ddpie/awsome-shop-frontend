@@ -1,32 +1,52 @@
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Divider from '@mui/material/Divider';
+import Alert from '@mui/material/Alert';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import HomeIcon from '@mui/icons-material/Home';
 
-const MOCK_ORDER = {
-  orderNo: 'ORD-20260319-001#',
-  productName: 'Sony WH-1000XM5 降噪耳机',
-  points: 2480,
-  remaining: 799,
-  deliveryDays: '3-5 个工作日',
-};
+interface SuccessState {
+  orderNo: string;
+  productName: string;
+  pointsSpent: number;
+  remainingBalance: number;
+}
 
 export default function RedemptionSuccessPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const state = location.state as SuccessState | null;
+
+  // Guard: if navigated here without state, show a fallback
+  if (!state) {
+    return (
+      <Box sx={{ bgcolor: '#F8FAFC', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Paper elevation={0} sx={{ width: 480, borderRadius: '16px', border: '1px solid #E2E8F0', p: '40px 40px 32px' }}>
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            {t('employee.success.noData', '未找到订单信息，请从兑换流程重新进入')}
+          </Alert>
+          <Button variant="contained" fullWidth onClick={() => navigate('/')}
+            sx={{ height: 44, borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}>
+            {t('employee.success.backHome')}
+          </Button>
+        </Paper>
+      </Box>
+    );
+  }
 
   const rows = [
-    { label: t('employee.success.orderNo'), value: MOCK_ORDER.orderNo },
-    { label: t('employee.success.product'), value: MOCK_ORDER.productName, valueColor: '#2563EB' },
-    { label: t('employee.success.pointsSpent'), value: `${MOCK_ORDER.points.toLocaleString()} 积分` },
-    { label: t('employee.success.remaining'), value: `${MOCK_ORDER.remaining} 积分` },
-    { label: t('employee.success.delivery'), value: MOCK_ORDER.deliveryDays },
+    { label: t('employee.success.orderNo'),     value: state.orderNo },
+    { label: t('employee.success.product'),     value: state.productName,                                    valueColor: '#2563EB' },
+    { label: t('employee.success.pointsSpent'), value: `${state.pointsSpent.toLocaleString()} ${t('employee.pointsUnit', '积分')}` },
+    { label: t('employee.success.remaining'),   value: `${state.remainingBalance.toLocaleString()} ${t('employee.pointsUnit', '积分')}` },
+    { label: t('employee.success.delivery'),    value: t('employee.success.deliveryDays', '3-5 个工作日') },
   ];
 
   return (
