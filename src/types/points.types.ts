@@ -73,3 +73,43 @@ export interface AdminTransactionParams {
   page?: number;
   size?: number;
 }
+
+// ── Distribution config ────────────────────────────────────────────────────
+
+/** Response from GET /api/v1/point/admin/config */
+export interface DistributionConfig {
+  amount: number;
+  updatedAt: string;
+}
+
+/** Request body for PUT /api/v1/point/admin/config */
+export interface UpdateDistributionConfigRequest {
+  amount: number;
+}
+
+// ── Points rules CRUD ──────────────────────────────────────────────────────
+
+export type PointsRuleType = 'FIXED' | 'PERFORMANCE' | 'HOLIDAY' | 'PROJECT' | 'ONBOARDING' | 'OTHER';
+export type PointsRuleStatus = 'ACTIVE' | 'DISABLED';
+
+export interface PointsRule {
+  id: number;
+  name: string;
+  description: string;
+  type: PointsRuleType;
+  points: string;
+  triggerCondition: string;
+  status: PointsRuleStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePointsRuleRequest {
+  name: string;
+  description?: string;
+  type: PointsRuleType;
+  points: string;
+  triggerCondition?: string;
+}
+
+export interface UpdatePointsRuleRequest extends CreatePointsRuleRequest {}

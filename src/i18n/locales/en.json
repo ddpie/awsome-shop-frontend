@@ -538,6 +538,22 @@
       "edit": "Edit",
       "toggle": "Enable/Disable",
       "delete": "Delete"
+    },
+    "pointsConfig": {
+      "title": "Points Distribution Config",
+      "subtitle": "Configure the monthly automatic points distribution for all employees",
+      "monthlyDistribution": "Monthly Points Distribution",
+      "monthlyDistributionDesc": "System automatically distributes a fixed amount to all employees on the 1st of each month",
+      "amountLabel": "Monthly Distribution Amount (points)",
+      "amountPlaceholder": "Enter monthly points amount",
+      "amountHint": "Must be a positive integer. Changes take effect on the next distribution cycle.",
+      "schedule": "Schedule: 1st of each month at 2:00 AM",
+      "lastUpdated": "Last updated",
+      "save": "Save Config",
+      "saveSuccess": "Distribution config updated",
+      "saveError": "Failed to save, please try again",
+      "loadError": "Failed to load config",
+      "invalidAmount": "Please enter a positive integer"
     }
   },
   "menu": {

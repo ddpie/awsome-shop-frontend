@@ -537,6 +537,22 @@
       "edit": "编辑",
       "toggle": "启用/禁用",
       "delete": "删除"
+    },
+    "pointsConfig": {
+      "title": "积分发放配置",
+      "subtitle": "配置每月自动发放给所有员工的积分额度",
+      "monthlyDistribution": "月度积分发放",
+      "monthlyDistributionDesc": "系统每月 1 日自动为所有员工发放固定额度积分",
+      "amountLabel": "每月发放额度（积分）",
+      "amountPlaceholder": "请输入每月发放积分数量",
+      "amountHint": "必须为大于 0 的整数，修改后下次发放生效",
+      "schedule": "发放周期：每月 1 日凌晨 2:00 自动执行",
+      "lastUpdated": "最后更新",
+      "save": "保存配置",
+      "saveSuccess": "积分发放配置已更新",
+      "saveError": "保存失败，请重试",
+      "loadError": "加载配置失败",
+      "invalidAmount": "请输入大于 0 的整数"
     }
   },
   "menu": {

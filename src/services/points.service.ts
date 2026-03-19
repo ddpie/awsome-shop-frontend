@@ -8,6 +8,10 @@ import type {
   AdminBalanceItem,
   RawAdminBalanceItem,
   AdminTransactionParams,
+  DistributionConfig,
+  PointsRule,
+  CreatePointsRuleRequest,
+  UpdatePointsRuleRequest,
 } from '../types/points.types';
 import type { PageResult } from '../types/product.types';
 
@@ -95,5 +99,43 @@ export const pointsService = {
       currentPage: (raw?.currentPage ?? 1) - 1, // backend 1-based → frontend 0-based
       size: raw?.size ?? params?.size ?? 10,
     };
+  },
+
+  // ── Distribution config ────────────────────────────────────────────────
+
+  adminGetConfig: async (): Promise<DistributionConfig> => {
+    const res = await http.get('/v1/point/admin/config');
+    return unwrapData<DistributionConfig>(res);
+  },
+
+  adminUpdateConfig: async (amount: number): Promise<DistributionConfig> => {
+    const res = await http.put('/v1/point/admin/config', { amount });
+    return unwrapData<DistributionConfig>(res);
+  },
+
+  // ── Rules CRUD ─────────────────────────────────────────────────────────
+
+  adminGetRules: async (params?: { page?: number; size?: number }): Promise<PageResult<PointsRule>> => {
+    const res = await http.get('/v1/point/admin/rules', { params });
+    return unwrapData<PageResult<PointsRule>>(res);
+  },
+
+  adminCreateRule: async (data: CreatePointsRuleRequest): Promise<PointsRule> => {
+    const res = await http.post('/v1/point/admin/rules', data);
+    return unwrapData<PointsRule>(res);
+  },
+
+  adminUpdateRule: async (id: number, data: UpdatePointsRuleRequest): Promise<PointsRule> => {
+    const res = await http.put(`/v1/point/admin/rules/${id}`, data);
+    return unwrapData<PointsRule>(res);
+  },
+
+  adminToggleRuleStatus: async (id: number, status: string): Promise<PointsRule> => {
+    const res = await http.put(`/v1/point/admin/rules/${id}/status`, { status });
+    return unwrapData<PointsRule>(res);
+  },
+
+  adminDeleteRule: async (id: number): Promise<void> => {
+    await http.delete(`/v1/point/admin/rules/${id}`);
   },
 };
