@@ -63,6 +63,41 @@ export default function OrderManagePage() {
   const [filterAnchor, setFilterAnchor] = useState<null | HTMLElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Compute stat card values from loaded orders
+  const [stats, setStats] = useState<Record<string, string | null>>({
+    totalOrders: null, pending: null, completed: null, pointsConsumed: null,
+  });
+
+  useEffect(() => {
+    // Use adminPagination.totalElements for total, and fetch a larger set to compute stats
+    if (adminPagination.totalElements > 0 || adminOrders.length > 0) {
+      (async () => {
+        try {
+          // Fetch all orders (up to 100) to compute stats
+          const res = await (await import('../../services/order.service')).orderService.adminGetOrders({ page: 0, size: 100 });
+          const unwrap = <T,>(r: unknown): T => { const x = r as { data?: T }; return x?.data !== undefined ? x.data : r as T; };
+          const data = unwrap<{ content?: { status?: string; pointsCost?: number }[]; totalElements?: number }>(res);
+          const allOrders = data.content ?? [];
+          const total = data.totalElements ?? allOrders.length;
+          const pendingCount = allOrders.filter(o => o.status === 'PENDING').length;
+          const completedCount = allOrders.filter(o => o.status === 'COMPLETED').length;
+          const pointsSum = allOrders.reduce((sum, o) => sum + (o.pointsCost ?? 0), 0);
+          setStats({
+            totalOrders: total.toLocaleString(),
+            pending: pendingCount.toLocaleString(),
+            completed: completedCount.toLocaleString(),
+            pointsConsumed: pointsSum.toLocaleString(),
+          });
+        } catch {
+          setStats({
+            totalOrders: String(adminPagination.totalElements),
+            pending: '—', completed: '—', pointsConsumed: '—',
+          });
+        }
+      })();
+    }
+  }, [adminPagination.totalElements, adminOrders.length]);
+
   const load = useCallback((p: number, kw: string, st: string) => {
     fetchAdminOrders({ page: p - 1, size: PAGE_SIZE, keyword: kw || undefined, status: st || undefined });
   }, [fetchAdminOrders]);
@@ -147,7 +182,9 @@ export default function OrderManagePage() {
                   <IconComp sx={{ fontSize: 20, color: card.iconColor }} />
                 </Box>
               </Box>
-              <Typography sx={{ fontSize: 28, fontWeight: 700, color: '#1E293B' }}>—</Typography>
+              <Typography sx={{ fontSize: 28, fontWeight: 700, color: '#1E293B' }}>
+                {stats[card.key] != null ? stats[card.key] : <CircularProgress size={24} />}
+              </Typography>
             </Paper>
           );
         })}

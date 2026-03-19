@@ -18,28 +18,34 @@ import TollIcon from '@mui/icons-material/Toll';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import { useOrderStore } from '../../stores/order.store';
-import type { Order, OrderStatus } from '../../types/order.types';
+import type { Order } from '../../types/order.types';
 
 // ── Status config ──────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<OrderStatus, { labelKey: string; bgcolor: string; color: string }> = {
+const STATUS_CONFIG: Record<string, { labelKey: string; bgcolor: string; color: string }> = {
+  PENDING:    { labelKey: 'employee.orders.statusPending',   bgcolor: '#DBEAFE', color: '#2563EB' },
   pending:    { labelKey: 'employee.orders.statusPending',   bgcolor: '#DBEAFE', color: '#2563EB' },
+  PROCESSING: { labelKey: 'employee.orders.statusPending',   bgcolor: '#DBEAFE', color: '#2563EB' },
   processing: { labelKey: 'employee.orders.statusPending',   bgcolor: '#DBEAFE', color: '#2563EB' },
+  SHIPPED:    { labelKey: 'employee.orders.statusShipped',   bgcolor: '#FEF3C7', color: '#D97706' },
   shipped:    { labelKey: 'employee.orders.statusShipped',   bgcolor: '#FEF3C7', color: '#D97706' },
+  READY:      { labelKey: 'employee.orders.statusShipped',   bgcolor: '#FEF3C7', color: '#D97706' },
+  COMPLETED:  { labelKey: 'employee.orders.statusCompleted', bgcolor: '#DCFCE7', color: '#16A34A' },
   completed:  { labelKey: 'employee.orders.statusCompleted', bgcolor: '#DCFCE7', color: '#16A34A' },
+  CANCELLED:  { labelKey: 'employee.orders.statusCancelled', bgcolor: '#F1F5F9', color: '#64748B' },
   cancelled:  { labelKey: 'employee.orders.statusCancelled', bgcolor: '#F1F5F9', color: '#64748B' },
 };
 
 const TAB_STATUSES = ['all', 'pending', 'shipped', 'completed', 'cancelled'] as const;
 type TabStatus = (typeof TAB_STATUSES)[number];
 
-// Map tab value → API status param (undefined = no filter)
-const TAB_TO_API_STATUS: Record<TabStatus, string | undefined> = {
-  all:       undefined,
-  pending:   'pending',
-  shipped:   'shipped',
-  completed: 'completed',
-  cancelled: 'cancelled',
+// Map tab → status values to match (case-insensitive, backend returns UPPERCASE)
+const TAB_STATUS_FILTER: Record<TabStatus, string[]> = {
+  all:       [],
+  pending:   ['PENDING', 'PROCESSING'],
+  shipped:   ['SHIPPED', 'READY'],
+  completed: ['COMPLETED'],
+  cancelled: ['CANCELLED'],
 };
 
 const PAGE_SIZE = 10;
@@ -177,28 +183,26 @@ export default function OrderListPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
-  // Fetch whenever tab or page changes
+  // Fetch all orders (backend doesn't support status filter)
   useEffect(() => {
-    fetchOrders({
-      page: page - 1,
-      size: PAGE_SIZE,
-      status: TAB_TO_API_STATUS[activeTab],
-    });
-  }, [activeTab, page, fetchOrders]);
+    fetchOrders({ page: page - 1, size: PAGE_SIZE });
+  }, [page, fetchOrders]);
 
   const handleTabChange = (_: React.SyntheticEvent, v: TabStatus) => {
     setActiveTab(v);
     setPage(1);
   };
 
-  // Client-side search filter on the current page results
-  const displayed = search
-    ? orders.filter(
-        (o) =>
-          o.productName.toLowerCase().includes(search.toLowerCase()) ||
-          o.orderNo.toLowerCase().includes(search.toLowerCase()),
-      )
-    : orders;
+  // Client-side tab status filter + search filter
+  const statusFilter = TAB_STATUS_FILTER[activeTab];
+  const filtered = orders.filter((o) => {
+    if (statusFilter.length > 0 && !statusFilter.includes(String(o.status).toUpperCase())) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return o.productName.toLowerCase().includes(q) || (o.orderNo ?? '').toLowerCase().includes(q);
+    }
+    return true;
+  });
 
   return (
     <Box sx={{ p: '24px 32px', display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -267,12 +271,12 @@ export default function OrderListPage() {
       {/* Order list */}
       {!loading && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {displayed.length === 0 ? (
+          {filtered.length === 0 ? (
             <Typography sx={{ textAlign: 'center', color: '#94A3B8', py: 8, fontSize: 14 }}>
               {t('employee.orders.empty', '暂无订单记录')}
             </Typography>
           ) : (
-            displayed.map((order) => <OrderCard key={order.id} order={order} />)
+            filtered.map((order) => <OrderCard key={order.id} order={order} />)
           )}
         </Box>
       )}
