@@ -34,5 +34,7 @@ export const pointsService = {
     http.get('/v1/point/admin/balances', { params: userId ? { userId } : undefined }),
 
   adminGetTransactions: (params?: AdminTransactionParams): Promise<PageResult<PointsTransaction>> =>
-    http.get('/v1/point/admin/transactions', { params }),
+    http.get(`/v1/point/admin/transactions/${params?.userId ?? ''}`, {
+      params: params ? { page: params.page, size: params.size, type: params.type } : undefined,
+    }),
 };

@@ -4,45 +4,35 @@ import type { Product, Category, ProductListParams, PageResult, AdminProductList
 export const productService = {
   // Employee-facing
   getProducts: (params?: ProductListParams): Promise<PageResult<Product>> =>
-    http.get('/v1/product', { params }),
+    http.post('/v1/public/product/list', params ?? {}),
 
   getProductById: (id: string): Promise<Product> =>
-    http.get(`/v1/product/${id}`),
+    http.post('/v1/public/product/get', { id }),
 
   // Legacy alias used by admin pages
   getProduct: (id: number): Promise<Product> =>
-    http.get(`/v1/product/${id}`),
-
-  // Admin only (employee-facing legacy)
-  createProduct: (data: Partial<Product>): Promise<Product> =>
-    http.post('/v1/product', data),
-
-  updateProduct: (id: number, data: Partial<Product>): Promise<Product> =>
-    http.put(`/v1/product/${id}`, data),
-
-  deleteProduct: (id: number): Promise<void> =>
-    http.delete(`/v1/product/${id}`),
+    http.post('/v1/public/product/get', { id }),
 
   // Admin product management
   adminGetProducts: (params?: AdminProductListParams): Promise<PageResult<Product>> =>
-    http.get('/v1/product/admin/products', { params }),
+    http.post('/v1/admin/product/list', params ?? {}),
 
   adminGetProductById: (id: string): Promise<Product> =>
-    http.get(`/v1/product/admin/products/${id}`),
+    http.post('/v1/admin/product/get', { id }),
 
   adminCreateProduct: (data: Partial<Product>): Promise<Product> =>
-    http.post('/v1/product/admin/products', data),
+    http.post('/v1/admin/product/create', data),
 
   adminUpdateProduct: (id: string, data: Partial<Product>): Promise<Product> =>
-    http.put(`/v1/product/admin/products/${id}`, data),
+    http.post('/v1/admin/product/update', { id, ...data }),
 
   adminDeleteProduct: (id: string): Promise<void> =>
-    http.delete(`/v1/product/admin/products/${id}`),
+    http.post('/v1/admin/product/delete', { id }),
 
   uploadProductImage: (file: File): Promise<{ url: string }> => {
     const form = new FormData();
     form.append('file', file);
-    return http.post('/v1/product/file/upload', form, {
+    return http.post('/v1/public/file/upload', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
@@ -50,17 +40,17 @@ export const productService = {
 
 export const categoryService = {
   getCategories: (): Promise<Category[]> =>
-    http.get('/v1/product/categories'),
+    http.post('/v1/public/category/list'),
 
   createCategory: (data: { name: string; sortWeight: number; parentId?: number | null }): Promise<Category> =>
-    http.post('/v1/product/categories', data),
+    http.post('/v1/admin/category/create', data),
 
   updateCategory: (id: number, data: { name: string; sortWeight: number }): Promise<Category> =>
-    http.put(`/v1/product/categories/${id}`, data),
+    http.post('/v1/admin/category/update', { id, ...data }),
 
   deleteCategory: (id: number): Promise<void> =>
-    http.delete(`/v1/product/categories/${id}`),
+    http.post('/v1/admin/category/delete', { id }),
 
   toggleStatus: (id: number, status: 'active' | 'inactive'): Promise<Category> =>
-    http.patch(`/v1/product/categories/${id}/status`, { status }),
+    http.post('/v1/admin/category/update', { id, status }),
 };
