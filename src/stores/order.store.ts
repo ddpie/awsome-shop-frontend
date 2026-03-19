@@ -165,15 +165,12 @@ export const useOrderStore = create<OrderState>((set) => ({
     set({ adminLoading: true, adminError: null });
     try {
       const res = await orderService.adminGetOrders(params);
-      console.log('[DEBUG fetchAdminOrders] raw res:', JSON.stringify(res).substring(0, 300));
       const result = normalizePageResult(unwrapData<PageResult<Order>>(res));
-      console.log('[DEBUG fetchAdminOrders] unwrapped+normalized:', result.content.length, 'orders, total:', result.totalElements);
       set({
         adminOrders: result.content,
         adminPagination: { totalElements: result.totalElements, totalPages: result.totalPages, currentPage: result.currentPage ?? 0, size: params?.size ?? 20 },
       });
     } catch (e: unknown) {
-      console.error('[DEBUG fetchAdminOrders] error:', e);
       set({ adminError: (e as Error).message });
     } finally {
       set({ adminLoading: false });

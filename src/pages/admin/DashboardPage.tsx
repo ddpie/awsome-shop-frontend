@@ -65,10 +65,30 @@ export default function DashboardPage() {
     monthlyRedemptions: '—',
     pointsCirculation: '—',
   });
+  const [userMap, setUserMap] = useState<Record<number, string>>({});
 
   useEffect(() => {
     fetchAdminOrders({ page: 0, size: 4 });
   }, [fetchAdminOrders]);
+
+  // Resolve userIds to display names after orders load
+  useEffect(() => {
+    if (adminOrders.length === 0) return;
+    const userIds = [...new Set(adminOrders.map((o) => o.userId).filter(Boolean))];
+    if (userIds.length === 0) return;
+    (async () => {
+      try {
+        const res = await authService.getAdminUsers({ page: 0, size: 100 });
+        const data = unwrap<{ content?: { id: number | string; name?: string; username?: string; displayName?: string }[] }>(res);
+        const users = data.content ?? (Array.isArray(data) ? data : []);
+        const map: Record<number, string> = {};
+        for (const u of users) {
+          map[Number(u.id)] = u.name || u.displayName || u.username || `User ${u.id}`;
+        }
+        setUserMap(map);
+      } catch { /* ignore */ }
+    })();
+  }, [adminOrders]);
 
   // Fetch aggregate metrics from available APIs
   useEffect(() => {
@@ -98,10 +118,18 @@ export default function DashboardPage() {
 
       // Points Circulation (sum of all user balances)
       try {
-        const balRes = await pointsService.adminGetBalances();
-        const balData = unwrap<{ content?: { userId: number; balance: number }[] } | { userId: number; balance: number }[]>(balRes);
-        const balances = Array.isArray(balData) ? balData : (balData as { content?: { userId: number; balance: number }[] }).content ?? [];
-        const total = balances.reduce((sum: number, b) => sum + (b.balance ?? 0), 0);
+        const http = (await import('../../services/http')).default;
+        let allBalances: { userId: number; balance: number }[] = [];
+        let page = 0;
+        let totalPages = 1;
+        while (page < totalPages) {
+          const raw = await http.get('/v1/point/admin/balances', { params: { page, size: 100 } });
+          const pageData = unwrap<{ content?: { userId: number; balance: number }[]; totalPages?: number }>(raw);
+          if (pageData.content) allBalances = allBalances.concat(pageData.content);
+          totalPages = pageData.totalPages ?? 1;
+          page++;
+        }
+        const total = allBalances.reduce((sum: number, b) => sum + (b.balance ?? 0), 0);
         results.pointsCirculation = total.toLocaleString();
       } catch { /* API not available */ }
 
@@ -187,7 +215,7 @@ export default function DashboardPage() {
                   const cfg = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG['pending'];
                   return (
                     <TableRow key={order.id} sx={{ '&:last-child td': { borderBottom: 0 } }}>
-                      <TableCell sx={{ fontSize: 13, py: '12px', px: '20px' }}>{order.userName ?? '—'}</TableCell>
+                      <TableCell sx={{ fontSize: 13, py: '12px', px: '20px' }}>{order.userName ?? userMap[order.userId] ?? `User #${order.userId}`}</TableCell>
                       <TableCell sx={{ fontSize: 13, py: '12px', px: '20px' }}>{order.productName}</TableCell>
                       <TableCell sx={{ fontSize: 13, py: '12px', px: '20px' }}>{order.pointsCost?.toLocaleString() ?? '—'}</TableCell>
                       <TableCell sx={{ py: '12px', px: '20px' }}>
