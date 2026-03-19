@@ -18,11 +18,9 @@ import GroupIcon from '@mui/icons-material/Group';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import TollIcon from '@mui/icons-material/Toll';
 import type { SvgIconComponent } from '@mui/icons-material';
-import Skeleton from '@mui/material/Skeleton';
 import { useOrderStore } from '../../stores/order.store';
 import { productService } from '../../services/product.service';
 import { authService } from '../../services/auth.service';
-import { pointsService } from '../../services/points.service';
 
 interface MetricDef {
   key: string;
@@ -94,7 +92,7 @@ export default function DashboardPage() {
   // Fetch aggregate metrics from available APIs
   useEffect(() => {
     (async () => {
-      const results: Record<string, string> = { ...metrics };
+      const results: Record<string, string | null> = { ...metrics };
 
       // Total Products
       try {

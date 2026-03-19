@@ -23,6 +23,11 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: str
   shipped:    { label: '已发货', color: '#1E40AF', bg: '#DBEAFE' },
   completed:  { label: '已完成', color: '#166534', bg: '#DCFCE7' },
   cancelled:  { label: '已取消', color: '#991B1B', bg: '#FEE2E2' },
+  PENDING:    { label: '待发货', color: '#92400E', bg: '#FEF3C7' },
+  PROCESSING: { label: '处理中', color: '#1E40AF', bg: '#DBEAFE' },
+  SHIPPED:    { label: '已发货', color: '#1E40AF', bg: '#DBEAFE' },
+  COMPLETED:  { label: '已完成', color: '#166534', bg: '#DCFCE7' },
+  CANCELLED:  { label: '已取消', color: '#991B1B', bg: '#FEE2E2' },
 };
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {

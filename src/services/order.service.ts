@@ -13,7 +13,7 @@ export const orderService = {
 
   // Employee: get single order by id
   getOrderById: (id: string): Promise<Order> =>
-    http.post('/v1/public/order/get', { id }),
+    http.post('/v1/public/order/get', { id: Number(id) }),
 
   // Legacy aliases (kept for backward-compat)
   createOrder: (data: CreateOrderRequest): Promise<Order> =>
@@ -36,8 +36,8 @@ export const orderService = {
     http.post('/v1/private/order/admin/list', params ?? {}),
 
   adminGetOrderById: (id: string): Promise<Order> =>
-    http.post('/v1/private/order/admin/get', { id }),
+    http.post('/v1/public/order/get', { id: Number(id) }),
 
   adminUpdateOrderStatus: (id: string, status: string): Promise<Order> =>
-    http.post('/v1/private/order/admin/update-status', { id, status }),
+    http.post('/v1/private/order/admin/update-status', { id: Number(id), status }),
 };

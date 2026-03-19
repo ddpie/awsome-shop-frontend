@@ -9,7 +9,6 @@ import Button from '@mui/material/Button';
 import RedeemIcon from '@mui/icons-material/Redeem';
 import SearchIcon from '@mui/icons-material/Search';
 import TollIcon from '@mui/icons-material/Toll';
-import { useAuthStore } from '../../stores/auth.store';
 import { usePointsStore } from '../../stores/points.store';
 import { useProductStore } from '../../stores/product.store';
 import AvatarMenu from './AvatarMenu';
@@ -24,7 +23,6 @@ export default function EmployeeLayout() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const user = useAuthStore((s) => s.user);
   const balance = usePointsStore((s) => s.balance);
   const fetchBalance = usePointsStore((s) => s.fetchBalance);
   const { searchKeyword, setSearchKeyword, fetchProducts } = useProductStore();

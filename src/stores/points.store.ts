@@ -122,10 +122,18 @@ export const usePointsStore = create<PointsState>((set) => ({
   fetchTransactions: async (params) => {
     set({ loading: true, error: null });
     try {
-      const res = await pointsService.getTransactions(params);
+      // Always fetch all types from backend; filter client-side by EARN/SPEND
+      const filterType = params?.type;
+      const res = await pointsService.getTransactions({ page: params?.page, size: params?.size });
       const result = unwrapData<PageResult<RawPointsTransaction>>(res);
       // Normalize backend fields → frontend fields
-      const transactions = (result.content ?? []).map(normalizeTransaction);
+      let transactions = (result.content ?? []).map(normalizeTransaction);
+      // Client-side filter by normalized type
+      if (filterType === 'EARN') {
+        transactions = transactions.filter((tx) => tx.type === 'EARN');
+      } else if (filterType === 'SPEND') {
+        transactions = transactions.filter((tx) => tx.type === 'SPEND');
+      }
       // Backend currentPage is 1-based, frontend expects 0-based
       const currentPage = (result.currentPage ?? 1) - 1;
       set({

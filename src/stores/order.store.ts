@@ -178,9 +178,16 @@ export const useOrderStore = create<OrderState>((set) => ({
   },
 
   fetchAdminOrderById: async (id) => {
+    // Try to find the order from the already-loaded admin list first
+    const existing = useOrderStore.getState().adminOrders.find((o) => String(o.id) === id);
+    if (existing) {
+      set({ adminCurrentOrder: existing, adminLoading: false, adminError: null });
+      return;
+    }
     set({ adminLoading: true, adminError: null, adminCurrentOrder: null });
     try {
-      const res = await orderService.adminGetOrderById(id);
+      // Fallback: use public/order/get (works if current user is the order owner)
+      const res = await orderService.getOrderById(id);
       set({ adminCurrentOrder: normalizeOrder(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>) });
     } catch (e: unknown) {
       set({ adminError: (e as Error).message });

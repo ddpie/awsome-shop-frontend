@@ -64,7 +64,7 @@ const DIVIDER = '1px solid #F1F5F9';
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function UserPointsHistoryPage() {
-  const { id } = useParams<{ id: string }>();
+  useParams<{ id: string }>();
   const { t } = useTranslation();
   const [tab, setTab] = useState(0);
   const [page, setPage] = useState(1);
