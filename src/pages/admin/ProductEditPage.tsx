@@ -180,7 +180,7 @@ export default function ProductEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const isNew = id === 'new';
+  const isNew = !id || id === 'new';
 
   const {
     adminCurrentProduct,
@@ -268,6 +268,17 @@ export default function ProductEditPage() {
 
   const handleSave = async () => {
     setSubmitError(null);
+
+    // Frontend validation for backend required fields
+    if (!name.trim()) {
+      setSubmitError('商品名称不能为空');
+      return;
+    }
+    if (!points || Number(points) < 1) {
+      setSubmitError('积分价格必须大于 0');
+      return;
+    }
+
     setSubmitting(true);
     try {
       // Map frontend fields → backend CreateProductRequest / UpdateProductRequest fields
@@ -276,21 +287,27 @@ export default function ProductEditPage() {
         .reduce<Record<string, string>>((acc, s) => { acc[s.key] = s.value; return acc; }, {});
       const specsJson = Object.keys(specsObj).length > 0 ? JSON.stringify(specsObj) : undefined;
       const payload: Record<string, unknown> = {
-        name,
-        sku: sku || undefined,
-        categoryId: categoryId ? Number(categoryId) : undefined,
+        name: name.trim(),
+        sku: sku || `SKU${Date.now()}`,
+        categoryId: categoryId ? Number(categoryId) : 1,
         brand: brand || undefined,
-        pointsPrice: points ? Number(points) : 0,
+        pointsPrice: Number(points),
         marketPrice: originalPrice ? Number(originalPrice) : undefined,
         stock: stock ? Number(stock) : 0,
         description: description || undefined,
         mainImage: imageUrl || undefined,
         specs: specsJson,
       };
+      let result: unknown;
       if (isNew) {
-        await createAdminProduct(payload);
+        result = await createAdminProduct(payload);
       } else if (id) {
-        await updateAdminProduct(id, { id: Number(id), ...payload });
+        result = await updateAdminProduct(id, { id: Number(id), ...payload });
+      }
+      // Check if backend returned a business error inside the envelope
+      const envelope = result as { code?: number | string; message?: string } | undefined;
+      if (envelope && envelope.code != null && envelope.code !== 0 && envelope.code !== '0' && envelope.code !== 'SUCCESS') {
+        throw new Error(envelope.message ?? '保存失败');
       }
       navigate('/admin/products');
     } catch (e: unknown) {

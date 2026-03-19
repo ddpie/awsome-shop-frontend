@@ -80,7 +80,7 @@ export default function UserManagePage() {
 
   const load = useCallback(
     (p = page) => {
-      fetchAdminUsers({ page: p, size: PAGE_SIZE, keyword: search || undefined, role: role || undefined });
+      fetchAdminUsers({ page: p - 1, size: PAGE_SIZE, keyword: search || undefined, role: role || undefined });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [page, search, role],
@@ -118,7 +118,7 @@ export default function UserManagePage() {
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
-    fetchAdminUsers({ page: value, size: PAGE_SIZE, keyword: search || undefined, role: role || undefined });
+    fetchAdminUsers({ page: value - 1, size: PAGE_SIZE, keyword: search || undefined, role: role || undefined });
   };
 
   const handleToggleStatus = async (id: string, current: 'ACTIVE' | 'INACTIVE') => {

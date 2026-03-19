@@ -101,7 +101,7 @@ interface ProductState {
   fetchAdminProducts: (params?: AdminProductListParams) => Promise<void>;
   fetchAdminProductById: (id: string) => Promise<void>;
   createAdminProduct: (data: Partial<Product>) => Promise<Product>;
-  updateAdminProduct: (id: string, data: Partial<Product>) => Promise<void>;
+  updateAdminProduct: (id: string, data: Partial<Product>) => Promise<Product>;
   deleteAdminProduct: (id: string) => Promise<void>;
   clearAdminError: () => void;
 }
@@ -264,11 +264,12 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   updateAdminProduct: async (id, data) => {
-    await productService.adminUpdateProduct(id, data);
+    const res = await productService.adminUpdateProduct(id, data);
     const current = get().adminCurrentProduct;
     if (current && String(current.id) === id) {
       set({ adminCurrentProduct: { ...current, ...data } });
     }
+    return res;
   },
 
   deleteAdminProduct: async (id) => {

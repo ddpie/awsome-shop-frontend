@@ -292,7 +292,7 @@
     },
     "products": {
       "title": "Product Management",
-      "addProduct": "+ Add Product",
+      "addProduct": "Add Product",
       "search": "Search products...",
       "allCategories": "All Categories",
       "allStatus": "All Status",
