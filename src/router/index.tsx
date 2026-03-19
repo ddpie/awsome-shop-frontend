@@ -7,6 +7,7 @@ import AdminLayout from '../components/Layout/AdminLayout';
 
 // Lazy-loaded pages — auth
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
 
 // Lazy-loaded pages — employee
 const ShopHomePage = lazy(() => import('../pages/employee/ShopHomePage'));
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: wrap(<LoginPage />),
+  },
+  {
+    path: '/register',
+    element: wrap(<RegisterPage />),
   },
   // Employee routes
   {

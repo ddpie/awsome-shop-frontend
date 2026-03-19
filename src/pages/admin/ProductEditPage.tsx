@@ -56,7 +56,9 @@ function UploadImageDialog({
     setError(null);
     try {
       const result = await productService.uploadProductImage(file);
-      const url = result.url;
+      // Backend returns { code, data: { url, filename } }, http interceptor returns the envelope
+      const envelope = result as unknown as { data?: { url?: string }; url?: string };
+      const url = envelope.data?.url ?? envelope.url ?? '';
       setUploadedUrls((prev) => {
         const next = [...prev, url];
         setSelected(next.length - 1);
@@ -226,12 +228,36 @@ export default function ProductEditPage() {
       setSku(p.sku ?? '');
       setCategoryId(p.categoryId != null ? String(p.categoryId) : '');
       setBrand(p.brand ?? '');
-      setPoints(String(p.pointsCost ?? ''));
-      setOriginalPrice(p.originalPrice != null ? String(p.originalPrice) : '');
+      setPoints(String(p.pointsCost ?? p.pointsPrice ?? ''));
+      setOriginalPrice(p.marketPrice != null ? String(p.marketPrice) : (p.originalPrice != null ? String(p.originalPrice) : ''));
       setStock(String(p.stock ?? ''));
       setDescription(p.description ?? '');
-      setImageUrl(p.imageUrl ?? '');
-      setSpecs(p.specs?.length ? p.specs : [{ key: '', value: '' }]);
+      setImageUrl(p.mainImage ?? p.imageUrl ?? '');
+      // specs is a JSON string from backend, parse into key-value pairs
+      if (typeof p.specs === 'string' && p.specs) {
+        try {
+          const parsed = JSON.parse(p.specs);
+          if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+            // { "颜色": "红色", "尺寸": "M" }
+            const entries = Object.entries(parsed).map(([key, value]) => ({ key, value: String(value) }));
+            setSpecs(entries.length > 0 ? entries : [{ key: '', value: '' }]);
+          } else if (Array.isArray(parsed)) {
+            // [{ "key": "颜色", "value": "红色" }]
+            setSpecs(parsed.length > 0 ? parsed.map((s: { key?: string; value?: string }) => ({ key: s.key ?? '', value: s.value ?? '' })) : [{ key: '', value: '' }]);
+          } else {
+            setSpecs([{ key: '', value: '' }]);
+          }
+        } catch {
+          // Fallback: treat as plain text lines
+          const lines = p.specs.split('\n').filter(Boolean).map((line) => {
+            const [key, ...rest] = line.split(':');
+            return { key: key?.trim() ?? '', value: rest.join(':').trim() };
+          });
+          setSpecs(lines.length > 0 ? lines : [{ key: '', value: '' }]);
+        }
+      } else {
+        setSpecs([{ key: '', value: '' }]);
+      }
     }
   }, [isNew, adminCurrentProduct]);
 
@@ -244,22 +270,27 @@ export default function ProductEditPage() {
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const payload = {
+      // Map frontend fields → backend CreateProductRequest / UpdateProductRequest fields
+      const specsObj = specs
+        .filter((s) => s.key && s.value)
+        .reduce<Record<string, string>>((acc, s) => { acc[s.key] = s.value; return acc; }, {});
+      const specsJson = Object.keys(specsObj).length > 0 ? JSON.stringify(specsObj) : undefined;
+      const payload: Record<string, unknown> = {
         name,
         sku: sku || undefined,
         categoryId: categoryId ? Number(categoryId) : undefined,
         brand: brand || undefined,
-        pointsCost: points ? Number(points) : 0,
-        originalPrice: originalPrice ? Number(originalPrice) : undefined,
+        pointsPrice: points ? Number(points) : 0,
+        marketPrice: originalPrice ? Number(originalPrice) : undefined,
         stock: stock ? Number(stock) : 0,
         description: description || undefined,
-        imageUrl: imageUrl || undefined,
-        specs: specs.filter((s) => s.key || s.value),
+        mainImage: imageUrl || undefined,
+        specs: specsJson,
       };
       if (isNew) {
         await createAdminProduct(payload);
       } else if (id) {
-        await updateAdminProduct(id, payload);
+        await updateAdminProduct(id, { id: Number(id), ...payload });
       }
       navigate('/admin/products');
     } catch (e: unknown) {

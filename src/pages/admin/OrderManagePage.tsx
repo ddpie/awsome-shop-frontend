@@ -134,6 +134,10 @@ export default function OrderManagePage() {
     await updateAdminOrderStatus(id, 'READY');
   };
 
+  const handleComplete = async (id: string) => {
+    await updateAdminOrderStatus(id, 'COMPLETED');
+  };
+
   const STATUS_OPTIONS = [
     { value: '',          label: t('admin.orders.statusFilter') },
     { value: 'PENDING',   label: t('admin.orders.statusPending') },
@@ -247,6 +251,7 @@ export default function OrderManagePage() {
                   const statusKey = order.status as string;
                   const cfg = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG['pending'];
                   const isPending = statusKey === 'PENDING' || statusKey === 'pending';
+                  const isReady = statusKey === 'READY' || statusKey === 'ready' || statusKey === 'SHIPPED' || statusKey === 'shipped';
                   return (
                     <TableRow key={order.id} sx={{ '&:last-child td': { borderBottom: 0 } }}>
                       <TableCell sx={{ py: '12px', px: '20px' }}>
@@ -305,6 +310,15 @@ export default function OrderManagePage() {
                               onClick={() => handleShip(String(order.id))}
                             >
                               {t('admin.orders.ship')}
+                            </Typography>
+                          )}
+                          {isReady && (
+                            <Typography
+                              component="span"
+                              sx={{ fontSize: 12, fontWeight: 500, color: '#7C3AED', cursor: 'pointer', '&:hover': { opacity: 0.75 } }}
+                              onClick={() => handleComplete(String(order.id))}
+                            >
+                              {t('admin.orders.complete')}
                             </Typography>
                           )}
                         </Box>

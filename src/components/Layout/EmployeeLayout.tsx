@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
@@ -11,6 +11,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TollIcon from '@mui/icons-material/Toll';
 import { useAuthStore } from '../../stores/auth.store';
 import { usePointsStore } from '../../stores/points.store';
+import { useProductStore } from '../../stores/product.store';
 import AvatarMenu from './AvatarMenu';
 
 const NAV_ITEMS = [
@@ -26,10 +27,51 @@ export default function EmployeeLayout() {
   const user = useAuthStore((s) => s.user);
   const balance = usePointsStore((s) => s.balance);
   const fetchBalance = usePointsStore((s) => s.fetchBalance);
+  const { searchKeyword, setSearchKeyword, fetchProducts } = useProductStore();
+
+  const [localSearch, setLocalSearch] = useState(searchKeyword);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     fetchBalance();
   }, [fetchBalance]);
+
+  // Sync local input when store keyword is cleared externally
+  useEffect(() => {
+    setLocalSearch(searchKeyword);
+  }, [searchKeyword]);
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, []);
+
+  const handleSearchInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocalSearch(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearchKeyword(value);
+      // If on home page, trigger product fetch immediately
+      if (location.pathname === '/') {
+        fetchProducts({ page: 0, size: 20, keyword: value || undefined });
+      }
+    }, 400);
+  }, [setSearchKeyword, fetchProducts, location.pathname]);
+
+  const handleSearchSubmit = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearchKeyword(localSearch);
+    // Navigate to home if not already there, then fetch
+    if (location.pathname !== '/') {
+      navigate('/');
+    }
+    fetchProducts({ page: 0, size: 20, keyword: localSearch || undefined });
+  }, [localSearch, setSearchKeyword, fetchProducts, location.pathname, navigate]);
+
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearchSubmit();
+  }, [handleSearchSubmit]);
 
   const displayPoints = balance?.current ?? 0;
 
@@ -82,6 +124,9 @@ export default function EmployeeLayout() {
           >
             <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
             <InputBase
+              value={localSearch}
+              onChange={handleSearchInput}
+              onKeyDown={handleSearchKeyDown}
               placeholder={t('employee.searchPlaceholder')}
               sx={{ flex: 1, fontSize: 13 }}
               inputProps={{ 'aria-label': t('employee.searchPlaceholder') }}
@@ -89,6 +134,7 @@ export default function EmployeeLayout() {
             <Button
               variant="contained"
               size="small"
+              onClick={handleSearchSubmit}
               sx={{ borderRadius: '4px', height: 32, px: '16px', fontSize: 13, fontWeight: 500, textTransform: 'none', minWidth: 'auto' }}
             >
               {t('employee.search')}

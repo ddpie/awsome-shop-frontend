@@ -75,6 +75,10 @@ interface ProductState {
   categoryLoading: boolean;
   error: string | null;
 
+  /** Global search keyword set by the header search bar */
+  searchKeyword: string;
+  setSearchKeyword: (keyword: string) => void;
+
   // Admin state
   adminProducts: Product[];
   adminCurrentProduct: Product | null;
@@ -111,6 +115,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
   loading: false,
   categoryLoading: false,
   error: null,
+
+  searchKeyword: '',
+  setSearchKeyword: (keyword) => set({ searchKeyword: keyword }),
 
   adminProducts: [],
   adminCurrentProduct: null,

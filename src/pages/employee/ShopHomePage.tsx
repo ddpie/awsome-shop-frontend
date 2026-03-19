@@ -10,6 +10,9 @@ import CardContent from '@mui/material/CardContent';
 import Rating from '@mui/material/Rating';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import TollIcon from '@mui/icons-material/Toll';
@@ -19,35 +22,87 @@ import { useProductStore } from '../../stores/product.store';
 export default function ShopHomePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { products, loading, error, fetchProducts } = useProductStore();
+  const { products, categories: storeCategories, loading, error, fetchProducts, fetchCategories, searchKeyword } = useProductStore();
   const [activeCategory, setActiveCategory] = useState('');
+  const [selectedParent, setSelectedParent] = useState<number | null>(null);
+  const [selectedSub, setSelectedSub] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchProducts({ page: 0, size: 20 });
-  }, [fetchProducts]);
+    fetchProducts({ page: 0, size: 20, keyword: searchKeyword || undefined });
+    fetchCategories();
+  }, [fetchProducts, fetchCategories, searchKeyword]);
 
-  // Derive unique categories from loaded products
-  const categories = useMemo(() => {
-    const seen = new Set<string>();
-    const cats: { key: string; label: string }[] = [];
-    for (const p of products) {
-      if (p.categoryName && !seen.has(p.categoryName)) {
-        seen.add(p.categoryName);
-        cats.push({ key: p.categoryName, label: p.categoryName });
-      }
+  // Derive top-level and sub-categories from store
+  const topCategories = useMemo(
+    () => storeCategories.filter((c) => !c.parentId),
+    [storeCategories],
+  );
+
+  const subCategories = useMemo(
+    () => (selectedParent ? storeCategories.filter((c) => c.parentId === selectedParent) : []),
+    [storeCategories, selectedParent],
+  );
+
+  // Find parent/sub category objects for breadcrumb
+  const selectedParentCategory = useMemo(
+    () => (selectedParent ? storeCategories.find((c) => c.id === selectedParent) : undefined),
+    [storeCategories, selectedParent],
+  );
+
+  const selectedSubCategory = useMemo(
+    () => (selectedSub ? storeCategories.find((c) => c.id === selectedSub) : undefined),
+    [storeCategories, selectedSub],
+  );
+
+  const handleAllClick = () => {
+    setActiveCategory('');
+    setSelectedParent(null);
+    setSelectedSub(null);
+    fetchProducts({ page: 0, size: 20, keyword: searchKeyword || undefined });
+  };
+
+  const handleTopCategoryClick = (catId: number, catName: string) => {
+    if (selectedParent === catId && !selectedSub) {
+      handleAllClick();
+      return;
     }
-    return cats;
-  }, [products]);
+    setSelectedParent(catId);
+    setSelectedSub(null);
+    setActiveCategory(catName);
+    fetchProducts({ page: 0, size: 20, category: catName, keyword: searchKeyword || undefined });
+  };
 
-  const handleCategoryClick = (key: string) => {
-    const next = key === activeCategory ? '' : key;
-    setActiveCategory(next);
-    fetchProducts({ page: 0, size: 20, category: next || undefined });
+  const handleSubCategoryClick = (catId: number, catName: string) => {
+    if (selectedSub === catId) {
+      setSelectedSub(null);
+      const parentName = selectedParentCategory?.name || '';
+      setActiveCategory(parentName);
+      fetchProducts({ page: 0, size: 20, category: parentName || undefined, keyword: searchKeyword || undefined });
+      return;
+    }
+    setSelectedSub(catId);
+    setActiveCategory(catName);
+    fetchProducts({ page: 0, size: 20, category: catName, keyword: searchKeyword || undefined });
+  };
+
+  const handleBreadcrumbHomeClick = () => {
+    handleAllClick();
+  };
+
+  const handleBreadcrumbParentClick = () => {
+    if (selectedParentCategory) {
+      setSelectedSub(null);
+      setActiveCategory(selectedParentCategory.name);
+      fetchProducts({ page: 0, size: 20, category: selectedParentCategory.name, keyword: searchKeyword || undefined });
+    }
   };
 
   const filteredProducts = activeCategory
     ? products.filter((p) => p.categoryName === activeCategory)
     : products;
+
+  const isTopActive = (catId: number) => selectedParent === catId;
+  const isSubActive = (catId: number) => selectedSub === catId;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: '24px 32px' }}>
@@ -92,45 +147,109 @@ export default function ShopHomePage() {
         <ShoppingBagIcon sx={{ fontSize: 100, color: 'rgba(255,255,255,0.2)' }} />
       </Box>
 
-      {/* Category Filter */}
-      <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        <Chip
-          label={t('employee.category.all')}
-          onClick={() => handleCategoryClick('')}
-          sx={{
-            borderRadius: '20px',
-            fontSize: 13,
-            fontWeight: activeCategory === '' ? 600 : 400,
-            color: activeCategory === '' ? '#fff' : '#64748B',
-            bgcolor: activeCategory === '' ? '#2563EB' : '#fff',
-            border: activeCategory === '' ? 'none' : '1px solid #E2E8F0',
-            height: 'auto',
-            py: '8px',
-            px: '18px',
-            '& .MuiChip-label': { p: 0 },
-            '&:hover': { bgcolor: activeCategory === '' ? '#2563EB' : '#F8FAFC' },
-          }}
-        />
-        {categories.map((cat) => (
+      {/* Breadcrumb Navigation */}
+      {selectedParent && (
+        <Breadcrumbs
+          separator={<NavigateNextIcon sx={{ fontSize: 16, color: '#94A3B8' }} />}
+          sx={{ '& .MuiBreadcrumbs-li': { lineHeight: 1 } }}
+        >
+          <Link
+            component="button"
+            underline="hover"
+            onClick={handleBreadcrumbHomeClick}
+            sx={{ fontSize: 13, color: '#64748B', cursor: 'pointer' }}
+          >
+            {t('employee.productDetail.breadcrumbHome')}
+          </Link>
+          {selectedSub && selectedParentCategory ? (
+            <Link
+              component="button"
+              underline="hover"
+              onClick={handleBreadcrumbParentClick}
+              sx={{ fontSize: 13, color: '#64748B', cursor: 'pointer' }}
+            >
+              {selectedParentCategory.name}
+            </Link>
+          ) : (
+            <Typography sx={{ fontSize: 13, color: '#1E293B', fontWeight: 600 }}>
+              {selectedParentCategory?.name}
+            </Typography>
+          )}
+          {selectedSub && selectedSubCategory && (
+            <Typography sx={{ fontSize: 13, color: '#1E293B', fontWeight: 600 }}>
+              {selectedSubCategory.name}
+            </Typography>
+          )}
+        </Breadcrumbs>
+      )}
+
+      {/* Top-level Category Filter */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <Chip
-            key={cat.key}
-            label={cat.label}
-            onClick={() => handleCategoryClick(cat.key)}
+            label={t('employee.category.all')}
+            onClick={handleAllClick}
             sx={{
               borderRadius: '20px',
               fontSize: 13,
-              fontWeight: activeCategory === cat.key ? 600 : 400,
-              color: activeCategory === cat.key ? '#fff' : '#64748B',
-              bgcolor: activeCategory === cat.key ? '#2563EB' : '#fff',
-              border: activeCategory === cat.key ? 'none' : '1px solid #E2E8F0',
+              fontWeight: !selectedParent ? 600 : 400,
+              color: !selectedParent ? '#fff' : '#64748B',
+              bgcolor: !selectedParent ? '#2563EB' : '#fff',
+              border: !selectedParent ? 'none' : '1px solid #E2E8F0',
               height: 'auto',
               py: '8px',
               px: '18px',
               '& .MuiChip-label': { p: 0 },
-              '&:hover': { bgcolor: activeCategory === cat.key ? '#2563EB' : '#F8FAFC' },
+              '&:hover': { bgcolor: !selectedParent ? '#2563EB' : '#F8FAFC' },
             }}
           />
-        ))}
+          {topCategories.map((cat) => (
+            <Chip
+              key={cat.id}
+              label={cat.name}
+              onClick={() => handleTopCategoryClick(cat.id, cat.name)}
+              sx={{
+                borderRadius: '20px',
+                fontSize: 13,
+                fontWeight: isTopActive(cat.id) ? 600 : 400,
+                color: isTopActive(cat.id) ? '#fff' : '#64748B',
+                bgcolor: isTopActive(cat.id) ? '#2563EB' : '#fff',
+                border: isTopActive(cat.id) ? 'none' : '1px solid #E2E8F0',
+                height: 'auto',
+                py: '8px',
+                px: '18px',
+                '& .MuiChip-label': { p: 0 },
+                '&:hover': { bgcolor: isTopActive(cat.id) ? '#2563EB' : '#F8FAFC' },
+              }}
+            />
+          ))}
+        </Box>
+
+        {/* Sub-category chips */}
+        {subCategories.length > 0 && (
+          <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap', pl: '4px' }}>
+            {subCategories.map((cat) => (
+              <Chip
+                key={cat.id}
+                label={cat.name}
+                onClick={() => handleSubCategoryClick(cat.id, cat.name)}
+                sx={{
+                  borderRadius: '20px',
+                  fontSize: 12,
+                  fontWeight: isSubActive(cat.id) ? 600 : 400,
+                  color: isSubActive(cat.id) ? '#fff' : '#64748B',
+                  bgcolor: isSubActive(cat.id) ? '#2563EB' : '#fff',
+                  border: isSubActive(cat.id) ? 'none' : '1px solid #E2E8F0',
+                  height: 'auto',
+                  py: '6px',
+                  px: '14px',
+                  '& .MuiChip-label': { p: 0 },
+                  '&:hover': { bgcolor: isSubActive(cat.id) ? '#2563EB' : '#F8FAFC' },
+                }}
+              />
+            ))}
+          </Box>
+        )}
       </Box>
 
       {/* Loading state */}

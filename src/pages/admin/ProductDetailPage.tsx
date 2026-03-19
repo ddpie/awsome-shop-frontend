@@ -48,7 +48,9 @@ function UploadImageDialog({
     setError(null);
     try {
       const result = await productService.uploadProductImage(file);
-      const url = result.url;
+      // Backend returns { code, data: { url, filename } }, http interceptor returns the envelope
+      const envelope = result as unknown as { data?: { url?: string }; url?: string };
+      const url = envelope.data?.url ?? envelope.url ?? '';
       setUploadedUrls((prev) => [...prev, url]);
       onUploaded?.(url);
     } catch {
@@ -433,8 +435,8 @@ export default function AdminProductDetailPage() {
             <Divider sx={{ borderColor: '#F1F5F9' }} />
             {/* Main image */}
             <Box sx={{ height: 300, borderRadius: '8px', bgcolor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              {product.imageUrl ? (
-                <Box component="img" src={product.imageUrl} alt={product.name} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {(product.mainImage || product.imageUrl) ? (
+                <Box component="img" src={product.mainImage ?? product.imageUrl} alt={product.name} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <ImageIcon sx={{ fontSize: 100, color: '#CBD5E1' }} />
               )}
@@ -444,8 +446,8 @@ export default function AdminProductDetailPage() {
               {[0, 1, 2].map((i) => (
                 <Box key={i} onClick={() => setActiveThumb(i)}
                   sx={{ width: 80, height: 80, borderRadius: '8px', bgcolor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, border: activeThumb === i ? '2px solid #2563EB' : '1px solid #E2E8F0', overflow: 'hidden' }}>
-                  {product.imageUrl && i === 0 ? (
-                    <Box component="img" src={product.imageUrl} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {(product.mainImage || product.imageUrl) && i === 0 ? (
+                    <Box component="img" src={product.mainImage ?? product.imageUrl} alt="" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <ImageIcon sx={{ fontSize: 28, color: '#CBD5E1' }} />
                   )}
@@ -518,14 +520,36 @@ export default function AdminProductDetailPage() {
       </Paper>
 
       {/* ── Specs Card ── */}
-      {product.specs && product.specs.length > 0 && (
+      {product.specs && product.specs.length > 0 && (() => {
+        // Parse specs: could be JSON object, JSON array, or plain string
+        let specEntries: { key: string; value: string }[] = [];
+        if (typeof product.specs === 'string') {
+          try {
+            const parsed = JSON.parse(product.specs);
+            if (Array.isArray(parsed)) {
+              specEntries = parsed.map((s: { key?: string; value?: string }) => ({ key: s.key ?? '', value: s.value ?? '' }));
+            } else if (typeof parsed === 'object' && parsed !== null) {
+              specEntries = Object.entries(parsed).map(([key, value]) => ({ key, value: String(value) }));
+            }
+          } catch {
+            // Plain text fallback
+            specEntries = product.specs.split('\n').filter(Boolean).map((line) => {
+              const [key, ...rest] = line.split(':');
+              return { key: key?.trim() ?? '', value: rest.join(':').trim() };
+            });
+          }
+        } else if (Array.isArray(product.specs)) {
+          specEntries = product.specs;
+        }
+        if (specEntries.length === 0) return null;
+        return (
         <Paper elevation={0} sx={CARD_SX}>
           <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Typography sx={{ fontSize: 16, fontWeight: 600, color: '#1E293B' }}>{t('admin.productDetail.specs', '规格参数')}</Typography>
             <Divider sx={{ borderColor: '#F1F5F9' }} />
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              {product.specs.map((spec, i) => (
-                <Box key={i} sx={{ display: 'flex', alignItems: 'center', py: '10px', borderBottom: i < (product.specs?.length ?? 0) - 1 ? '1px solid #F1F5F9' : 'none' }}>
+              {specEntries.map((spec, i) => (
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', py: '10px', borderBottom: i < specEntries.length - 1 ? '1px solid #F1F5F9' : 'none' }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#64748B', width: 160, flexShrink: 0 }}>{spec.key}</Typography>
                   <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#1E293B' }}>{spec.value}</Typography>
                 </Box>
@@ -533,7 +557,8 @@ export default function AdminProductDetailPage() {
             </Box>
           </Box>
         </Paper>
-      )}
+        );
+      })()}
 
       {/* Dialogs */}
       <AdjustStockDialog
@@ -552,7 +577,7 @@ export default function AdminProductDetailPage() {
         open={uploadDialogOpen}
         onClose={() => setUploadDialogOpen(false)}
         onUploaded={(url) => {
-          if (id) updateAdminProduct(id, { imageUrl: url });
+          if (id) updateAdminProduct(id, { mainImage: url } as Record<string, unknown>);
         }}
       />
     </Box>

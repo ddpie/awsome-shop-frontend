@@ -27,6 +27,29 @@
     "register": "Register Now",
     "hint": "Test accounts: employee / emp123 (Employee) or admin / admin123 (Admin)"
   },
+  "register": {
+    "title": "Create Account",
+    "subtitle": "Register a new account to use points redemption",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Enter username",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter password (min 8 chars)",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter password",
+    "nameLabel": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "employeeIdLabel": "Employee ID",
+    "employeeIdPlaceholder": "Enter employee ID",
+    "registerBtn": "Register",
+    "registering": "Registering...",
+    "registerSuccess": "Registration successful, please sign in",
+    "registerFailed": "Registration failed",
+    "usernameTaken": "Username already taken",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "hasAccount": "Already have an account?",
+    "loginNow": "Sign In"
+  },
   "employee": {
     "orders": {
       "title": "Redemption History",
@@ -329,6 +352,7 @@
       "colStatus": "Status",
       "colAction": "Action",
       "ship": "Ship",
+      "complete": "Complete",
       "statusPending": "Pending",
       "statusShipped": "Shipped",
       "statusCompleted": "Completed",

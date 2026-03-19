@@ -1,9 +1,12 @@
 import http from './http';
-import type { LoginRequest, LoginResponse, UserResponse, AdminUserListParams } from '../types/auth.types';
+import type { LoginRequest, LoginResponse, UserResponse, AdminUserListParams, RegisterRequest } from '../types/auth.types';
 
 export const authService = {
   login: (data: LoginRequest): Promise<LoginResponse> =>
     http.post('/v1/public/auth/login', data),
+
+  register: (data: RegisterRequest): Promise<void> =>
+    http.post('/v1/public/auth/register', data),
 
   logout: (): Promise<void> =>
     http.post('/v1/auth/logout'),

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { Link as RouterLink } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -9,6 +10,7 @@ import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Alert from '@mui/material/Alert';
+import Link from '@mui/material/Link';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -208,6 +210,13 @@ export default function LoginPage() {
             >
               {loading ? t('login.loggingIn') : t('login.loginBtn')}
             </Button>
+
+            <Typography sx={{ fontSize: 14, color: 'text.secondary', textAlign: 'center' }}>
+              {t('login.noAccount')}{' '}
+              <Link component={RouterLink} to="/register" sx={{ fontWeight: 600 }}>
+                {t('login.register')}
+              </Link>
+            </Typography>
           </Box>
         </Box>
       </Box>
