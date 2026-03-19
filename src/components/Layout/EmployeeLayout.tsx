@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
@@ -9,6 +10,7 @@ import RedeemIcon from '@mui/icons-material/Redeem';
 import SearchIcon from '@mui/icons-material/Search';
 import TollIcon from '@mui/icons-material/Toll';
 import { useAuthStore } from '../../stores/auth.store';
+import { usePointsStore } from '../../stores/points.store';
 import AvatarMenu from './AvatarMenu';
 
 const NAV_ITEMS = [
@@ -22,6 +24,14 @@ export default function EmployeeLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
+  const balance = usePointsStore((s) => s.balance);
+  const fetchBalance = usePointsStore((s) => s.fetchBalance);
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
+
+  const displayPoints = balance?.current ?? 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#F8FAFC' }}>
@@ -86,7 +96,7 @@ export default function EmployeeLayout() {
           </Box>
           <Chip
             icon={<TollIcon sx={{ fontSize: 18, color: '#D97706 !important' }} />}
-            label={`${(user?.points ?? 0).toLocaleString()} ${t('employee.pointsUnit')}`}
+            label={`${displayPoints.toLocaleString()} ${t('employee.pointsUnit')}`}
             sx={{ bgcolor: '#FFFBEB', color: '#D97706', fontWeight: 600, fontSize: 13, borderRadius: 20, '& .MuiChip-icon': { ml: 1 } }}
           />
           <AvatarMenu />

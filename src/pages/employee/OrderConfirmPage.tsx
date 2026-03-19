@@ -18,6 +18,7 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import { productService } from '../../services/product.service';
 import { pointsService } from '../../services/points.service';
 import { useOrderStore } from '../../stores/order.store';
+import { usePointsStore } from '../../stores/points.store';
 import type { Product } from '../../types/product.types';
 import type { PointsBalance } from '../../types/points.types';
 
@@ -96,6 +97,8 @@ export default function OrderConfirmPage() {
     clearError();
     try {
       const order = await placeOrder(productId);
+      // Refresh header balance after successful redemption
+      usePointsStore.getState().fetchBalance();
       navigate('/orders/success', {
         state: {
           orderNo: order.orderNo,

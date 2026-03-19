@@ -60,6 +60,13 @@ export const usePointsStore = create<PointsState>((set) => ({
   fetchBalance: async () => {
     try {
       const res = await pointsService.getBalance();
+      // Check if API returned an error envelope (code !== SUCCESS/0)
+      const envelope = res as { code?: number | string; data?: unknown; message?: string };
+      if (envelope.data === null || envelope.data === undefined) {
+        // No balance record — treat as 0
+        set({ balance: { current: 0, totalEarned: 0, totalSpent: 0, redemptionCount: 0 } });
+        return;
+      }
       const raw = unwrapData<{ userId?: number; balance?: number; current?: number; totalEarned?: number; totalSpent?: number; redemptionCount?: number }>(res);
       // Backend returns { userId, balance } — derive missing stats from transactions if needed
       const balance: PointsBalance = {
@@ -99,7 +106,16 @@ export const usePointsStore = create<PointsState>((set) => ({
         }
       }
     } catch (e: unknown) {
-      set({ error: (e as Error).message });
+      // If balance record doesn't exist (new user), show 0 instead of error
+      const axiosErr = e as { response?: { data?: { message?: string; code?: number | string } }; message?: string };
+      const apiMsg = axiosErr?.response?.data?.message ?? axiosErr?.message ?? '';
+      const apiCode = axiosErr?.response?.data?.code;
+      const isNotFound = apiMsg.includes('不存在') || apiMsg.includes('not found') || apiCode === 500000;
+      if (isNotFound) {
+        set({ balance: { current: 0, totalEarned: 0, totalSpent: 0, redemptionCount: 0 } });
+      } else {
+        set({ error: apiMsg || 'Failed to load balance' });
+      }
     }
   },
 
