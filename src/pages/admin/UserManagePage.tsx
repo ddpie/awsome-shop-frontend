@@ -86,6 +86,27 @@ export default function UserManagePage() {
     [page, search, role],
   );
 
+  // Compute stats from loaded users
+  const [activeCount, setActiveCount] = useState<number | null>(null);
+  const [newThisMonth, setNewThisMonth] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (adminUsers.length === 0 && adminLoading) return;
+    // Fetch all users (up to 100) to compute stats
+    (async () => {
+      try {
+        const allRes = await (await import('../../services/auth.service')).authService.getAdminUsers({ page: 0, size: 100 });
+        const unwrap = <T,>(res: unknown): T => { const r = res as { data?: T }; return r?.data !== undefined ? r.data : res as T; };
+        const data = unwrap<{ content?: { status?: string; createdAt?: string }[] }>(allRes);
+        const users = data.content ?? [];
+        setActiveCount(users.filter(u => u.status === 'ACTIVE').length);
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+        setNewThisMonth(users.filter(u => u.createdAt && u.createdAt.slice(0, 10) >= monthStart).length);
+      } catch { /* ignore */ }
+    })();
+  }, [adminUsers, adminLoading]);
+
   // Initial load
   useEffect(() => { load(1); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -175,7 +196,9 @@ export default function UserManagePage() {
               <CheckCircleIcon sx={{ fontSize: 20, color: '#16A34A' }} />
             </Box>
           </Box>
-          <Typography sx={{ fontSize: 28, fontWeight: 700, color: 'text.primary' }}>—</Typography>
+          <Typography sx={{ fontSize: 28, fontWeight: 700, color: 'text.primary' }}>
+            {activeCount != null ? activeCount : <CircularProgress size={24} />}
+          </Typography>
         </Paper>
         <Paper elevation={0} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 2.5, borderRadius: 3, border: '1px solid #F1F5F9' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -184,7 +207,9 @@ export default function UserManagePage() {
               <GroupIcon sx={{ fontSize: 20, color: '#D97706' }} />
             </Box>
           </Box>
-          <Typography sx={{ fontSize: 28, fontWeight: 700, color: 'text.primary' }}>—</Typography>
+          <Typography sx={{ fontSize: 28, fontWeight: 700, color: 'text.primary' }}>
+            {newThisMonth != null ? newThisMonth : <CircularProgress size={24} />}
+          </Typography>
         </Paper>
       </Box>
 

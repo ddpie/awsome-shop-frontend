@@ -18,6 +18,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import TollIcon from '@mui/icons-material/Toll';
 import type { SvgIconComponent } from '@mui/icons-material';
+import Skeleton from '@mui/material/Skeleton';
 import { useOrderStore } from '../../stores/order.store';
 import { productService } from '../../services/product.service';
 import { authService } from '../../services/auth.service';
@@ -59,11 +60,11 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { adminOrders, adminLoading, fetchAdminOrders } = useOrderStore();
-  const [metrics, setMetrics] = useState<Record<string, string>>({
-    totalProducts: '—',
-    totalUsers: '—',
-    monthlyRedemptions: '—',
-    pointsCirculation: '—',
+  const [metrics, setMetrics] = useState<Record<string, string | null>>({
+    totalProducts: null,
+    totalUsers: null,
+    monthlyRedemptions: null,
+    pointsCirculation: null,
   });
   const [userMap, setUserMap] = useState<Record<number, string>>({});
 
@@ -162,8 +163,10 @@ export default function DashboardPage() {
                   <IconComp sx={{ fontSize: 20, color: metric.iconColor }} />
                 </Box>
               </Box>
-              <Typography sx={{ fontSize: 28, fontWeight: 700, color: 'text.primary' }}>
-                {metrics[metric.key] ?? '—'}
+              <Typography sx={{ fontSize: 28, fontWeight: 700, color: 'text.primary', minHeight: 36, display: 'flex', alignItems: 'center' }}>
+                {metrics[metric.key] != null ? metrics[metric.key] : (
+                  <CircularProgress size={24} />
+                )}
               </Typography>
             </Paper>
           );
