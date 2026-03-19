@@ -206,7 +206,9 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "back": "Back"
+    "back": "Back",
+    "error": "Failed to load",
+    "loading": "Loading..."
   },
   "admin": {
     "productDetail": {
