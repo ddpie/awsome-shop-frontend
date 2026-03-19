@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -19,23 +19,29 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import TollIcon from '@mui/icons-material/Toll';
 import type { SvgIconComponent } from '@mui/icons-material';
 import { useOrderStore } from '../../stores/order.store';
+import { productService } from '../../services/product.service';
+import { authService } from '../../services/auth.service';
+import { pointsService } from '../../services/points.service';
 
-interface Metric {
+interface MetricDef {
   key: string;
-  value: string;
-  change: string;
-  changeColor: string;
   icon: SvgIconComponent;
   iconColor: string;
   iconBg: string;
 }
 
-const METRICS: Metric[] = [
-  { key: 'totalProducts', value: '—', change: '', changeColor: '#16A34A', icon: Inventory2Icon, iconColor: '#2563EB', iconBg: '#EFF6FF' },
-  { key: 'totalUsers', value: '—', change: '', changeColor: '#16A34A', icon: GroupIcon, iconColor: '#16A34A', iconBg: '#DCFCE7' },
-  { key: 'monthlyRedemptions', value: '—', change: '', changeColor: '#D97706', icon: ShoppingCartIcon, iconColor: '#D97706', iconBg: '#FEF3C7' },
-  { key: 'pointsCirculation', value: '—', change: '', changeColor: '#64748B', icon: TollIcon, iconColor: '#7C3AED', iconBg: '#EDE9FE' },
+const METRIC_DEFS: MetricDef[] = [
+  { key: 'totalProducts', icon: Inventory2Icon, iconColor: '#2563EB', iconBg: '#EFF6FF' },
+  { key: 'totalUsers', icon: GroupIcon, iconColor: '#16A34A', iconBg: '#DCFCE7' },
+  { key: 'monthlyRedemptions', icon: ShoppingCartIcon, iconColor: '#D97706', iconBg: '#FEF3C7' },
+  { key: 'pointsCirculation', icon: TollIcon, iconColor: '#7C3AED', iconBg: '#EDE9FE' },
 ];
+
+// Unwrap API envelope: { code, data } → data
+function unwrap<T>(res: unknown): T {
+  const r = res as { data?: T };
+  return r?.data !== undefined ? r.data : res as T;
+}
 
 const STATUS_CONFIG: Record<string, { labelKey: string; color: string; bg: string }> = {
   PENDING:   { labelKey: 'statusPending',   color: '#92400E', bg: '#FEF3C7' },
@@ -53,10 +59,56 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { adminOrders, adminLoading, fetchAdminOrders } = useOrderStore();
+  const [metrics, setMetrics] = useState<Record<string, string>>({
+    totalProducts: '—',
+    totalUsers: '—',
+    monthlyRedemptions: '—',
+    pointsCirculation: '—',
+  });
 
   useEffect(() => {
     fetchAdminOrders({ page: 0, size: 4 });
   }, [fetchAdminOrders]);
+
+  // Fetch aggregate metrics from available APIs
+  useEffect(() => {
+    (async () => {
+      const results: Record<string, string> = { ...metrics };
+
+      // Total Products
+      try {
+        const prodRes = await productService.adminGetProducts({ page: 0, size: 1 });
+        const prodData = unwrap<{ totalElements?: number }>(prodRes);
+        if (prodData.totalElements != null) results.totalProducts = prodData.totalElements.toLocaleString();
+      } catch { /* API not available */ }
+
+      // Total Users
+      try {
+        const userRes = await authService.getAdminUsers({ page: 0, size: 1 });
+        const userData = unwrap<{ totalElements?: number }>(userRes);
+        if (userData.totalElements != null) results.totalUsers = userData.totalElements.toLocaleString();
+      } catch { /* API not available */ }
+
+      // Monthly Redemptions (from admin orders if available)
+      try {
+        const orderRes = await (await import('../../services/order.service')).orderService.adminGetOrders({ page: 0, size: 1 });
+        const orderData = unwrap<{ totalElements?: number }>(orderRes);
+        if (orderData.totalElements != null) results.monthlyRedemptions = orderData.totalElements.toLocaleString();
+      } catch { /* Order admin API not available yet */ }
+
+      // Points Circulation (sum of all user balances)
+      try {
+        const balRes = await pointsService.adminGetBalances();
+        const balData = unwrap<{ content?: { userId: number; balance: number }[] } | { userId: number; balance: number }[]>(balRes);
+        const balances = Array.isArray(balData) ? balData : (balData as { content?: { userId: number; balance: number }[] }).content ?? [];
+        const total = balances.reduce((sum: number, b) => sum + (b.balance ?? 0), 0);
+        results.pointsCirculation = total.toLocaleString();
+      } catch { /* API not available */ }
+
+      setMetrics(results);
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px', p: '32px' }}>
@@ -64,9 +116,9 @@ export default function DashboardPage() {
         {t('admin.dashboard')}
       </Typography>
 
-      {/* Metric Cards — static, no aggregate API */}
+      {/* Metric Cards — aggregated from available APIs */}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-        {METRICS.map((metric) => {
+        {METRIC_DEFS.map((metric) => {
           const IconComp = metric.icon;
           return (
             <Paper
@@ -83,7 +135,7 @@ export default function DashboardPage() {
                 </Box>
               </Box>
               <Typography sx={{ fontSize: 28, fontWeight: 700, color: 'text.primary' }}>
-                {metric.value}
+                {metrics[metric.key] ?? '—'}
               </Typography>
             </Paper>
           );

@@ -63,11 +63,22 @@ export default function OrderConfirmPage() {
     setPageError(null);
 
     Promise.all([
-      productService.getProduct(Number(productId)),
-      pointsService.getMyBalance(),
+      productService.getProductById(productId),
+      pointsService.getBalance(),
     ])
-      .then(([prod, bal]) => {
-        setProduct(prod);
+      .then(([prodRes, balRes]) => {
+        // Unwrap envelopes
+        const prod = (prodRes as unknown as { data?: Product }).data ?? prodRes;
+        const rawBal = (balRes as unknown as { data?: PointsBalance }).data ?? balRes;
+        const bal: PointsBalance = {
+          ...rawBal,
+          current: rawBal.current ?? rawBal.balance ?? 0,
+          totalEarned: rawBal.totalEarned ?? 0,
+          totalSpent: rawBal.totalSpent ?? 0,
+          redemptionCount: rawBal.redemptionCount ?? 0,
+        };
+        // Normalize pointsPrice → pointsCost
+        setProduct({ ...prod, pointsCost: prod.pointsCost ?? (prod as unknown as { pointsPrice?: number }).pointsPrice ?? 0 } as Product);
         setBalance(bal);
       })
       .catch((e: unknown) => {

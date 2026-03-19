@@ -1,5 +1,5 @@
 import http from './http';
-import type { LoginRequest, LoginResponse, UserResponse, AdminUser, AdminUserListParams, AdminUserListResult } from '../types/auth.types';
+import type { LoginRequest, LoginResponse, UserResponse, AdminUserListParams } from '../types/auth.types';
 
 export const authService = {
   login: (data: LoginRequest): Promise<LoginResponse> =>
@@ -13,12 +13,12 @@ export const authService = {
 
   // ── Admin user management ──────────────────────────────────────────────
 
-  getAdminUsers: (params?: AdminUserListParams): Promise<AdminUserListResult> =>
+  getAdminUsers: (params?: AdminUserListParams): Promise<unknown> =>
     http.post('/v1/admin/user/list', params ?? {}),
 
-  getUserById: (id: string): Promise<AdminUser> =>
-    http.post('/v1/admin/user/get', { id }),
+  getUserById: (id: string): Promise<unknown> =>
+    http.post('/v1/admin/user/get', { id: Number(id) }),
 
   updateUserStatus: (id: string, status: string): Promise<void> =>
-    http.post('/v1/admin/user/update', { id, status }),
+    http.post('/v1/admin/user/update', { id: Number(id), status }),
 };

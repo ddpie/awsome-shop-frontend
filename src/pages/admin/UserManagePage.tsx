@@ -287,12 +287,12 @@ export default function UserManagePage() {
                       {/* Role badge */}
                       <TableCell sx={{ py: '12px', px: '20px' }}>
                         <Chip
-                          label={user.role === 'employee' ? t('admin.users.roleEmployee') : t('admin.users.roleAdmin')}
+                          label={user.role === 'EMPLOYEE' ? t('admin.users.roleEmployee') : t('admin.users.roleAdmin')}
                           size="small"
                           sx={{
                             fontSize: 11, fontWeight: 500, height: 24, borderRadius: '12px',
-                            bgcolor: user.role === 'employee' ? '#DBEAFE' : '#EDE9FE',
-                            color: user.role === 'employee' ? '#1E40AF' : '#5B21B6',
+                            bgcolor: user.role === 'EMPLOYEE' ? '#DBEAFE' : '#EDE9FE',
+                            color: user.role === 'EMPLOYEE' ? '#1E40AF' : '#5B21B6',
                           }}
                         />
                       </TableCell>

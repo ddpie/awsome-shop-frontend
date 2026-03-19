@@ -34,7 +34,30 @@ export interface UserResponse {
   createdAt: string;
 }
 
-// ── Admin user management ──────────────────────────────────────────────────
+// ── Raw backend types (before normalization) ───────────────────────────────
+
+/** Raw user object from backend admin endpoints */
+export interface RawAdminUser {
+  id: number;
+  username: string;
+  name: string;
+  employeeId: string;
+  role: UserRole;
+  status: UserStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Raw paginated response from POST /v1/admin/user/list (inside envelope .data) */
+export interface RawAdminUserListResult {
+  currentPage: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  content: RawAdminUser[];
+}
+
+// ── Frontend-normalized types (used by UI components) ──────────────────────
 
 export interface AdminUser {
   id: string;

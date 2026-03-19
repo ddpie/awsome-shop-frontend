@@ -2,6 +2,69 @@ import { create } from 'zustand';
 import { productService, categoryService } from '../services/product.service';
 import type { Product, Category, ProductListParams, AdminProductListParams, PageResult } from '../types/product.types';
 
+// Normalize backend product to frontend shape
+// Backend sends: pointsPrice, marketPrice, status (0|1), mainImage
+// Frontend expects: pointsCost, originalPrice, status ('ACTIVE'|'INACTIVE'), imageUrl
+function normalizeProduct(raw: Record<string, unknown>): Product {
+  const p = raw as Record<string, unknown> & Product;
+  // pointsPrice → pointsCost
+  const pointsCost = (p.pointsCost as number) ?? (p.pointsPrice as number) ?? 0;
+  // marketPrice → originalPrice
+  const originalPrice = (p.originalPrice as number) ?? (p.marketPrice as number) ?? undefined;
+  // status: backend 0 = active, 1 = inactive (numeric) → frontend string
+  let status: Product['status'] = p.status;
+  if (typeof p.status === 'number') {
+    status = p.status === 0 ? 'ACTIVE' : 'INACTIVE';
+  }
+  // mainImage → imageUrl (backend has no imageUrl field)
+  const imageUrl = p.imageUrl ?? p.mainImage ?? undefined;
+  return { ...p, pointsCost, originalPrice, status, imageUrl } as Product;
+}
+
+// Unwrap API envelope: { code, data } → data
+function unwrapData<T>(res: unknown): T {
+  const r = res as { data?: T };
+  return r?.data !== undefined ? r.data : res as T;
+}
+
+// Normalize a single backend category node to frontend shape
+// Backend sends: sortOrder, no status/description/productCount/parentId
+// Frontend expects: sortWeight, status, parentId, etc.
+function normalizeCategoryNode(raw: Record<string, unknown>, parentId: number | null): Category {
+  return {
+    id: raw.id as number,
+    name: raw.name as string,
+    description: (raw.description as string) ?? undefined,
+    productCount: (raw.productCount as number) ?? undefined,
+    sortWeight: (raw.sortWeight as number) ?? (raw.sortOrder as number) ?? 0,
+    status: (raw.status as Category['status']) ?? 'active',
+    parentId,
+    children: undefined, // flattened — children tracked via parentId
+  };
+}
+
+// Flatten nested category tree from backend into a flat list with parentId
+function flattenCategories(tree: Record<string, unknown>[]): Category[] {
+  const result: Category[] = [];
+  for (const node of tree) {
+    result.push(normalizeCategoryNode(node, null));
+    const children = node.children as Record<string, unknown>[] | undefined;
+    if (Array.isArray(children)) {
+      for (const child of children) {
+        result.push(normalizeCategoryNode(child, node.id as number));
+        // Support one more nesting level if needed
+        const grandchildren = child.children as Record<string, unknown>[] | undefined;
+        if (Array.isArray(grandchildren)) {
+          for (const gc of grandchildren) {
+            result.push(normalizeCategoryNode(gc, child.id as number));
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+
 interface ProductState {
   products: Product[];
   categories: Category[];
@@ -44,7 +107,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   categories: [],
   currentProduct: null,
   relatedProducts: [],
-  pagination: { totalElements: 0, totalPages: 0, page: 0, size: 20 },
+  pagination: { totalElements: 0, totalPages: 0, currentPage: 0, page: 0, size: 20 },
   loading: false,
   categoryLoading: false,
   error: null,
@@ -53,14 +116,16 @@ export const useProductStore = create<ProductState>((set, get) => ({
   adminCurrentProduct: null,
   adminLoading: false,
   adminError: null,
-  adminPagination: { totalElements: 0, totalPages: 0, page: 0, size: 20 },
+  adminPagination: { totalElements: 0, totalPages: 0, currentPage: 0, page: 0, size: 20 },
 
   fetchProducts: async (params) => {
     set({ loading: true, error: null });
     try {
-      const result = await productService.getProducts(params);
+      const res = await productService.getProducts(params);
+      // API returns { code, data: { content, currentPage, ... } }
+      const result = (res as unknown as { data: PageResult<Product> }).data ?? res;
       const { content, ...pagination } = result;
-      set({ products: content, pagination });
+      set({ products: (content as unknown as Record<string, unknown>[]).map(normalizeProduct), pagination: { totalElements: pagination.totalElements, totalPages: pagination.totalPages, currentPage: pagination.currentPage ?? 0, page: pagination.currentPage ?? 0, size: params?.size ?? 20 } });
     } catch (e: unknown) {
       set({ error: (e as Error).message });
     } finally {
@@ -71,8 +136,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
   fetchProduct: async (id) => {
     set({ loading: true, error: null });
     try {
-      const product = await productService.getProduct(id);
-      set({ currentProduct: product });
+      const res = await productService.getProduct(id);
+      set({ currentProduct: normalizeProduct(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>) });
     } catch (e: unknown) {
       set({ error: (e as Error).message });
     } finally {
@@ -83,8 +148,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
   fetchProductById: async (id) => {
     set({ loading: true, error: null });
     try {
-      const product = await productService.getProductById(id);
-      set({ currentProduct: product });
+      const res = await productService.getProductById(id);
+      set({ currentProduct: normalizeProduct(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>) });
     } catch (e: unknown) {
       set({ error: (e as Error).message });
     } finally {
@@ -94,9 +159,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
   fetchRelatedProducts: async (category, excludeId) => {
     try {
-      const result = await productService.getProducts({ category, page: 0, size: 4 });
+      const res = await productService.getProducts({ category, page: 0, size: 4 });
+      const result = unwrapData<PageResult<Product>>(res);
       const related = result.content.filter((p) => String(p.id) !== excludeId);
-      set({ relatedProducts: related.slice(0, 3) });
+      set({ relatedProducts: related.slice(0, 3).map((p) => normalizeProduct(p as unknown as Record<string, unknown>)) });
     } catch {
       set({ relatedProducts: [] });
     }
@@ -105,7 +171,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
   fetchCategories: async () => {
     set({ categoryLoading: true });
     try {
-      const categories = await categoryService.getCategories();
+      const res = await categoryService.getCategories();
+      const raw = unwrapData<Record<string, unknown>[]>(res);
+      const categories = Array.isArray(raw) ? flattenCategories(raw) : [];
       set({ categories });
     } catch {
       // API not ready yet — use mock data so the page is functional
@@ -154,9 +222,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
   fetchAdminProducts: async (params) => {
     set({ adminLoading: true, adminError: null });
     try {
-      const result = await productService.adminGetProducts(params);
+      const res = await productService.adminGetProducts(params);
+      const result = unwrapData<PageResult<Product>>(res);
       const { content, ...pagination } = result;
-      set({ adminProducts: content, adminPagination: pagination });
+      set({ adminProducts: (content as unknown as Record<string, unknown>[]).map(normalizeProduct), adminPagination: { totalElements: pagination.totalElements, totalPages: pagination.totalPages, currentPage: pagination.currentPage ?? 0, page: pagination.currentPage ?? 0, size: params?.size ?? 20 } });
     } catch (e: unknown) {
       set({ adminError: (e as Error).message });
     } finally {
@@ -167,8 +236,14 @@ export const useProductStore = create<ProductState>((set, get) => ({
   fetchAdminProductById: async (id) => {
     set({ adminLoading: true, adminError: null });
     try {
-      const product = await productService.adminGetProductById(id);
-      set({ adminCurrentProduct: product });
+      let res: unknown;
+      try {
+        res = await productService.adminGetProductById(id);
+      } catch {
+        // Admin get endpoint may not be available — fall back to public
+        res = await productService.getProductById(id);
+      }
+      set({ adminCurrentProduct: normalizeProduct(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>) });
     } catch (e: unknown) {
       set({ adminError: (e as Error).message });
     } finally {

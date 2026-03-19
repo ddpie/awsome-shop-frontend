@@ -1,4 +1,5 @@
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'completed' | 'cancelled';
+export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'COMPLETED' | 'CANCELLED'
+  | 'pending' | 'processing' | 'shipped' | 'completed' | 'cancelled';
 
 export interface DeliveryInfo {
   recipientName: string;
@@ -9,14 +10,15 @@ export interface DeliveryInfo {
 
 export interface Order {
   id: number;
-  orderNo: string;
+  orderNo?: string;
   userId: number;
   userName?: string;
   productId: number;
   productName: string;
   productImage?: string;
+  productImageUrl?: string | null;
   pointsCost: number;
-  quantity: number;
+  quantity?: number;
   status: OrderStatus;
   deliveryInfo?: DeliveryInfo;
   createdAt: string;
@@ -25,6 +27,6 @@ export interface Order {
 
 export interface CreateOrderRequest {
   productId: number;
-  quantity: number;
-  deliveryInfo: DeliveryInfo;
+  quantity?: number;
+  deliveryInfo?: DeliveryInfo;
 }

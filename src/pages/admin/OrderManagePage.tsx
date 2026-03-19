@@ -217,7 +217,7 @@ export default function OrderManagePage() {
                           sx={{ fontSize: 13, color: '#2563EB', fontWeight: 500, cursor: 'pointer' }}
                           onClick={() => navigate(`/admin/orders/${order.id}`)}
                         >
-                          {order.orderNo}
+                          {order.orderNo ?? `#${order.id}`}
                         </Typography>
                       </TableCell>
                       <TableCell sx={{ py: '12px', px: '20px' }}>

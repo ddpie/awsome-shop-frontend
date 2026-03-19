@@ -18,9 +18,17 @@ http.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Response interceptor: unified error handling
+// Response interceptor: unified error handling & envelope unwrap
 http.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    const body = response.data;
+    // Backend wraps responses in { code, message, data }
+    // Unwrap the envelope so services get the inner payload directly
+    if (body && typeof body === 'object' && 'code' in body && 'data' in body) {
+      return body;
+    }
+    return body;
+  },
   (error) => {
     const status = error.response?.status;
 

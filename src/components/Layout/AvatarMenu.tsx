@@ -46,7 +46,7 @@ export default function AvatarMenu() {
     navigate('/login');
   };
 
-  const roleLabel = user?.role === 'admin' ? t('menu.roleAdmin') : t('menu.roleEmployee');
+  const roleLabel = user?.role?.toUpperCase() === 'ADMIN' ? t('menu.roleAdmin') : t('menu.roleEmployee');
   const currentLang = i18n.language === 'zh' ? t('menu.langZh') : t('menu.langEn');
   const currentTheme = darkMode ? t('menu.themeDark') : t('menu.themeLight');
 

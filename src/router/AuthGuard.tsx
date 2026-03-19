@@ -1,10 +1,9 @@
 import { Navigate } from 'react-router';
 import { useAuthStore } from '../stores/auth.store';
-import type { UserRole } from '../types/auth.types';
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  requiredRole?: UserRole;
+  requiredRole?: string;
 }
 
 export default function AuthGuard({ children, requiredRole }: AuthGuardProps) {
@@ -15,8 +14,8 @@ export default function AuthGuard({ children, requiredRole }: AuthGuardProps) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to={user?.role === 'admin' ? '/admin' : '/'} replace />;
+  if (requiredRole && user?.role?.toUpperCase() !== requiredRole.toUpperCase()) {
+    return <Navigate to={user?.role?.toUpperCase() === 'ADMIN' ? '/admin' : '/'} replace />;
   }
 
   return <>{children}</>;

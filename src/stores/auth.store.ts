@@ -1,7 +1,44 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { storage } from '../utils/storage';
-import type { UserInfo, LoginRequest, AdminUser, AdminUserListParams, AdminUserListResult } from '../types/auth.types';
+import type {
+  UserInfo,
+  LoginRequest,
+  AdminUser,
+  AdminUserListParams,
+  AdminUserListResult,
+  RawAdminUser,
+  RawAdminUserListResult,
+} from '../types/auth.types';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Unwrap API envelope: { code, data, message } → data */
+function unwrapData<T>(res: unknown): T {
+  const r = res as { data?: T };
+  return r?.data !== undefined ? r.data : (res as T);
+}
+
+/** Normalize a single raw backend user → frontend AdminUser */
+function normalizeAdminUser(
+  raw: RawAdminUser,
+  balanceMap?: Map<number, number>,
+): AdminUser {
+  return {
+    id: String(raw.id),
+    username: raw.username,
+    displayName: raw.name || raw.username,
+    email: '', // backend doesn't provide email
+    department: undefined, // backend doesn't provide department
+    role: raw.role,
+    status: raw.status,
+    points: balanceMap?.get(raw.id) ?? 0,
+    redemptionCount: 0, // backend doesn't provide this in user list
+    createdAt: raw.createdAt,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Mock users — used when backend is unavailable (dev mode)
@@ -11,14 +48,14 @@ const MOCK_USERS: Record<string, UserInfo & { password: string; token: string }>
     username: 'admin',
     password: 'admin123',
     displayName: '管理员',
-    role: 'admin',
+    role: 'ADMIN',
     token: 'mock-token-admin',
   },
   employee: {
     username: 'employee',
     password: 'emp123',
     displayName: '李明',
-    role: 'employee',
+    role: 'EMPLOYEE',
     points: 2580,
     token: 'mock-token-employee',
   },
@@ -70,7 +107,7 @@ interface AuthState {
 // ---------------------------------------------------------------------------
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // ── Auth ────────────────────────────────────────────────────────────
       user: null,
       isAuthenticated: false,
@@ -87,14 +124,26 @@ export const useAuthStore = create<AuthState>()(
             const res = await authService.login(credentials);
             token = res.data.token;
             storage.setToken(token);
-            // Decode JWT payload to extract user info (no extra network call needed)
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            user = {
-              id: payload.userId ?? payload.sub,
-              username: payload.username ?? credentials.username,
-              displayName: payload.username ?? credentials.username,
-              role: (payload.role as string).toLowerCase() as UserInfo['role'],
-            };
+            // Fetch full user profile from backend
+            try {
+              const profileRes = await authService.getProfile();
+              const profile = (profileRes as unknown as { data?: { id: number; username: string; name: string; role: string } }).data ?? profileRes;
+              user = {
+                id: (profile as { id: number }).id,
+                username: (profile as { username: string }).username,
+                displayName: (profile as { name?: string }).name || credentials.username,
+                role: ((profile as { role: string }).role || 'EMPLOYEE').toUpperCase() as UserInfo['role'],
+              };
+            } catch {
+              // Fallback: decode JWT payload
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              user = {
+                id: payload.userId ?? payload.sub,
+                username: payload.username ?? credentials.username,
+                displayName: payload.username ?? credentials.username,
+                role: (payload.role as string).toUpperCase() as UserInfo['role'],
+              };
+            }
           } catch (apiErr: unknown) {
             const isNetworkError =
               !import.meta.env.PROD &&
@@ -135,14 +184,45 @@ export const useAuthStore = create<AuthState>()(
         set({ adminLoading: true, adminError: null });
         try {
           const { authService } = await import('../services/auth.service');
-          const res: AdminUserListResult = await authService.getAdminUsers(params);
+          const { pointsService } = await import('../services/points.service');
+
+          // Fetch users and balances in parallel
+          const [userRes, balanceRes] = await Promise.all([
+            authService.getAdminUsers(params),
+            pointsService.adminGetBalances().catch(() => [] as { userId: string; current: number }[]),
+          ]);
+
+          // Unwrap user list envelope
+          const rawList = unwrapData<RawAdminUserListResult>(userRes);
+
+          // Build userId → balance lookup (balanceRes is already normalized AdminBalanceItem[])
+          const balanceMap = new Map<number, number>();
+          if (Array.isArray(balanceRes)) {
+            for (const b of balanceRes) {
+              balanceMap.set(Number(b.userId), b.current);
+            }
+          }
+
+          // Normalize users
+          const content = (rawList.content ?? []).map((raw) =>
+            normalizeAdminUser(raw, balanceMap),
+          );
+
+          const result: AdminUserListResult = {
+            content,
+            totalElements: rawList.totalElements,
+            totalPages: rawList.totalPages,
+            page: rawList.currentPage,
+            size: rawList.size ?? params?.size ?? 10,
+          };
+
           set({
-            adminUsers: res.content,
+            adminUsers: result.content,
             adminPagination: {
-              page: res.page,
-              size: res.size,
-              total: res.totalElements,
-              totalPages: res.totalPages,
+              page: result.page,
+              size: result.size,
+              total: result.totalElements,
+              totalPages: result.totalPages,
             },
           });
         } catch (err: unknown) {
@@ -157,8 +237,9 @@ export const useAuthStore = create<AuthState>()(
         set({ adminLoading: true, adminError: null });
         try {
           const { authService } = await import('../services/auth.service');
-          const user = await authService.getUserById(id);
-          set({ selectedUser: user });
+          const res = await authService.getUserById(id);
+          const raw = unwrapData<RawAdminUser>(res);
+          set({ selectedUser: normalizeAdminUser(raw) });
         } catch (err: unknown) {
           const msg = (err as { message?: string }).message ?? 'Failed to load user';
           set({ adminError: msg });
@@ -185,7 +266,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (err: unknown) {
           const msg = (err as { message?: string }).message ?? 'Failed to update status';
           set({ adminError: msg });
-          throw err; // re-throw so the page can show feedback
+          throw err;
         } finally {
           set({ adminLoading: false });
         }

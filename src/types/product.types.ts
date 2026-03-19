@@ -12,23 +12,32 @@ export interface Category {
 export interface Product {
   id: number;
   name: string;
+  subtitle?: string;
   description?: string;
   imageUrl?: string;
+  mainImage?: string | null;
+  images?: string | null;
   pointsCost: number;
+  pointsPrice?: number;
+  marketPrice?: number;
   stock: number;
   categoryId: number;
   categoryName?: string;
   rating?: number;
   reviewCount?: number;
   soldCount?: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'active' | 'inactive';
+  status: number | 'ACTIVE' | 'INACTIVE' | 'active' | 'inactive';
   createdAt?: string;
   updatedAt?: string;
   // Admin-facing fields
   sku?: string;
   brand?: string;
   originalPrice?: number;
-  specs?: { key: string; value: string }[];
+  specs?: string | null;
+  colors?: string | null;
+  deliveryMethod?: string | null;
+  serviceGuarantee?: string | null;
+  promotion?: string | null;
 }
 
 export interface ProductListParams {
@@ -52,6 +61,7 @@ export interface PageResult<T> {
   content: T[];
   totalElements: number;
   totalPages: number;
-  page: number;
-  size: number;
+  currentPage: number;
+  page?: number;
+  size?: number;
 }

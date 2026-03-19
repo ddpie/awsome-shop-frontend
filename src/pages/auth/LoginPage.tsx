@@ -30,7 +30,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigate(user.role === 'admin' ? '/admin' : '/', { replace: true });
+      navigate(user.role?.toUpperCase() === 'ADMIN' ? '/admin' : '/', { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 

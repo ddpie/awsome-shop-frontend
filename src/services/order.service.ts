@@ -29,15 +29,16 @@ export const orderService = {
     http.post('/v1/public/order/list', params ?? {}),
 
   updateOrderStatus: (id: number, status: string): Promise<Order> =>
-    http.post('/v1/private/order/admin/update-status', { id, status }),
+    http.post('/v1/public/order/update-status', { id, status }),
 
-  // Admin
+  // Admin — backend has no admin-specific order endpoints yet;
+  // fall back to the public order endpoints which return all orders for admin role.
   adminGetOrders: (params?: { page?: number; size?: number; keyword?: string; status?: string }): Promise<PageResult<Order>> =>
-    http.post('/v1/private/order/admin/list', params ?? {}),
+    http.post('/v1/public/order/list', params ?? {}),
 
   adminGetOrderById: (id: string): Promise<Order> =>
-    http.post('/v1/private/order/admin/get', { id }),
+    http.post('/v1/public/order/get', { id }),
 
   adminUpdateOrderStatus: (id: string, status: string): Promise<Order> =>
-    http.post('/v1/private/order/admin/update-status', { id, status }),
+    http.post('/v1/public/order/update-status', { id, status }),
 };

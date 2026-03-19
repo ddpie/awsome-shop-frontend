@@ -3,29 +3,56 @@ import { orderService } from '../services/order.service';
 import type { Order, CreateOrderRequest } from '../types/order.types';
 import type { PageResult } from '../types/product.types';
 
+// Unwrap API envelope: { code, data } → data
+function unwrapData<T>(res: unknown): T {
+  const r = res as { data?: T };
+  return r?.data !== undefined ? r.data : res as T;
+}
+
+// Normalize backend order to frontend shape
+// Backend sends: productImageUrl, no orderNo/userName/quantity
+// Frontend expects: productImage, orderNo, userName, quantity
+function normalizeOrder(raw: Record<string, unknown>): Order {
+  const o = raw as Record<string, unknown> & Order;
+  return {
+    ...o,
+    orderNo: o.orderNo ?? `ORD${String(o.id).padStart(8, '0')}`,
+    userName: o.userName ?? undefined,
+    productImage: o.productImage ?? (o.productImageUrl as string | undefined) ?? undefined,
+    quantity: o.quantity ?? 1,
+  } as Order;
+}
+
+// Normalize a page result of orders
+function normalizePageResult(raw: PageResult<Order>): PageResult<Order> {
+  return {
+    ...raw,
+    content: Array.isArray(raw.content)
+      ? raw.content.map((o) => normalizeOrder(o as unknown as Record<string, unknown>))
+      : [],
+  };
+}
+
 interface OrderState {
   orders: Order[];
   currentOrder: Order | null;
-  pagination: Omit<PageResult<unknown>, 'content'>;
+  pagination: { totalElements: number; totalPages: number; currentPage: number; page?: number; size?: number };
   loading: boolean;
   error: string | null;
 
-  // Employee actions
   fetchOrders: (params?: { page?: number; size?: number; status?: string }) => Promise<void>;
   fetchOrderById: (id: string) => Promise<void>;
   placeOrder: (productId: string) => Promise<Order>;
 
-  // Legacy / shared actions (kept for admin pages)
   fetchMyOrders: (params?: { page?: number; size?: number }) => Promise<void>;
   fetchOrder: (id: number) => Promise<void>;
   createOrder: (data: CreateOrderRequest) => Promise<Order>;
 
-  // Admin actions
   adminOrders: Order[];
   adminCurrentOrder: Order | null;
   adminLoading: boolean;
   adminError: string | null;
-  adminPagination: Omit<PageResult<unknown>, 'content'>;
+  adminPagination: { totalElements: number; totalPages: number; currentPage: number; page?: number; size?: number };
   fetchAdminOrders: (params?: { page?: number; size?: number; keyword?: string; status?: string }) => Promise<void>;
   fetchAdminOrderById: (id: string) => Promise<void>;
   updateAdminOrderStatus: (id: string, status: string) => Promise<void>;
@@ -36,23 +63,25 @@ interface OrderState {
 export const useOrderStore = create<OrderState>((set) => ({
   orders: [],
   currentOrder: null,
-  pagination: { totalElements: 0, totalPages: 0, page: 0, size: 20 },
+  pagination: { totalElements: 0, totalPages: 0, currentPage: 0 },
   loading: false,
   error: null,
 
-  // Admin state
   adminOrders: [],
   adminCurrentOrder: null,
   adminLoading: false,
   adminError: null,
-  adminPagination: { totalElements: 0, totalPages: 0, page: 0, size: 20 },
+  adminPagination: { totalElements: 0, totalPages: 0, currentPage: 0 },
 
   fetchOrders: async (params) => {
     set({ loading: true, error: null });
     try {
-      const result = await orderService.getOrders(params);
-      const { content, ...pagination } = result;
-      set({ orders: content, pagination });
+      const res = await orderService.getOrders(params);
+      const result = normalizePageResult(unwrapData<PageResult<Order>>(res));
+      set({
+        orders: result.content,
+        pagination: { totalElements: result.totalElements, totalPages: result.totalPages, currentPage: result.currentPage ?? 0, size: params?.size ?? 20 },
+      });
     } catch (e: unknown) {
       set({ error: (e as Error).message });
     } finally {
@@ -63,8 +92,8 @@ export const useOrderStore = create<OrderState>((set) => ({
   fetchOrderById: async (id) => {
     set({ loading: true, error: null, currentOrder: null });
     try {
-      const order = await orderService.getOrderById(id);
-      set({ currentOrder: order });
+      const res = await orderService.getOrderById(id);
+      set({ currentOrder: normalizeOrder(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>) });
     } catch (e: unknown) {
       set({ error: (e as Error).message });
     } finally {
@@ -75,7 +104,8 @@ export const useOrderStore = create<OrderState>((set) => ({
   placeOrder: async (productId) => {
     set({ loading: true, error: null });
     try {
-      const order = await orderService.placeOrder(productId);
+      const res = await orderService.placeOrder(productId);
+      const order = normalizeOrder(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>);
       set({ currentOrder: order });
       return order;
     } catch (e: unknown) {
@@ -86,13 +116,15 @@ export const useOrderStore = create<OrderState>((set) => ({
     }
   },
 
-  // Legacy methods kept for admin pages
   fetchMyOrders: async (params) => {
     set({ loading: true, error: null });
     try {
-      const result = await orderService.getMyOrders(params);
-      const { content, ...pagination } = result;
-      set({ orders: content, pagination });
+      const res = await orderService.getMyOrders(params);
+      const result = normalizePageResult(unwrapData<PageResult<Order>>(res));
+      set({
+        orders: result.content,
+        pagination: { totalElements: result.totalElements, totalPages: result.totalPages, currentPage: result.currentPage ?? 0 },
+      });
     } catch (e: unknown) {
       set({ error: (e as Error).message });
     } finally {
@@ -103,8 +135,8 @@ export const useOrderStore = create<OrderState>((set) => ({
   fetchOrder: async (id) => {
     set({ loading: true, error: null });
     try {
-      const order = await orderService.getOrder(id);
-      set({ currentOrder: order });
+      const res = await orderService.getOrder(id);
+      set({ currentOrder: normalizeOrder(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>) });
     } catch (e: unknown) {
       set({ error: (e as Error).message });
     } finally {
@@ -115,7 +147,8 @@ export const useOrderStore = create<OrderState>((set) => ({
   createOrder: async (data) => {
     set({ loading: true, error: null });
     try {
-      const order = await orderService.createOrder(data);
+      const res = await orderService.createOrder(data);
+      const order = normalizeOrder(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>);
       set({ currentOrder: order });
       return order;
     } catch (e: unknown) {
@@ -128,14 +161,19 @@ export const useOrderStore = create<OrderState>((set) => ({
 
   clearError: () => set({ error: null }),
 
-  // Admin actions
   fetchAdminOrders: async (params) => {
     set({ adminLoading: true, adminError: null });
     try {
-      const result = await orderService.adminGetOrders(params);
-      const { content, ...pagination } = result;
-      set({ adminOrders: content, adminPagination: pagination });
+      const res = await orderService.adminGetOrders(params);
+      console.log('[DEBUG fetchAdminOrders] raw res:', JSON.stringify(res).substring(0, 300));
+      const result = normalizePageResult(unwrapData<PageResult<Order>>(res));
+      console.log('[DEBUG fetchAdminOrders] unwrapped+normalized:', result.content.length, 'orders, total:', result.totalElements);
+      set({
+        adminOrders: result.content,
+        adminPagination: { totalElements: result.totalElements, totalPages: result.totalPages, currentPage: result.currentPage ?? 0, size: params?.size ?? 20 },
+      });
     } catch (e: unknown) {
+      console.error('[DEBUG fetchAdminOrders] error:', e);
       set({ adminError: (e as Error).message });
     } finally {
       set({ adminLoading: false });
@@ -145,8 +183,8 @@ export const useOrderStore = create<OrderState>((set) => ({
   fetchAdminOrderById: async (id) => {
     set({ adminLoading: true, adminError: null, adminCurrentOrder: null });
     try {
-      const order = await orderService.adminGetOrderById(id);
-      set({ adminCurrentOrder: order });
+      const res = await orderService.adminGetOrderById(id);
+      set({ adminCurrentOrder: normalizeOrder(unwrapData<Record<string, unknown>>(res) as Record<string, unknown>) });
     } catch (e: unknown) {
       set({ adminError: (e as Error).message });
     } finally {
@@ -157,10 +195,14 @@ export const useOrderStore = create<OrderState>((set) => ({
   updateAdminOrderStatus: async (id, status) => {
     set({ adminLoading: true, adminError: null });
     try {
-      const updated = await orderService.adminUpdateOrderStatus(id, status);
+      const res = await orderService.adminUpdateOrderStatus(id, status);
+      const raw = unwrapData<Record<string, unknown>>(res);
+      const updated = raw ? normalizeOrder(raw as Record<string, unknown>) : null;
       set((state) => ({
-        adminOrders: state.adminOrders.map((o) => (String(o.id) === id ? updated : o)),
-        adminCurrentOrder: state.adminCurrentOrder && String(state.adminCurrentOrder.id) === id ? updated : state.adminCurrentOrder,
+        adminOrders: state.adminOrders.map((o) => (String(o.id) === id ? { ...o, status: (updated?.status ?? status) as Order['status'] } : o)),
+        adminCurrentOrder: state.adminCurrentOrder && String(state.adminCurrentOrder.id) === id
+          ? { ...state.adminCurrentOrder, status: (updated?.status ?? status) as Order['status'] }
+          : state.adminCurrentOrder,
       }));
     } catch (e: unknown) {
       set({ adminError: (e as Error).message });
